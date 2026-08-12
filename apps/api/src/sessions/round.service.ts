@@ -6,6 +6,10 @@ import {
 } from "@nestjs/common";
 import type { Game, Round } from "@spiderman/db";
 import { PrismaService } from "../common/prisma/prisma.service";
+import { RedisService } from "../common/redis/redis.service";
+import { ROUND_CACHE_TTL_SECONDS } from "../common/constants";
+
+const ROUND_CACHE_KEY = "round:current";
 
 const GAME_ENABLED_COLUMN: Record<Game, "wordleEnabled" | "shadowEnabled" | "cardsEnabled"> = {
   WORDLE: "wordleEnabled",
@@ -15,13 +19,20 @@ const GAME_ENABLED_COLUMN: Record<Game, "wordleEnabled" | "shadowEnabled" | "car
 
 @Injectable()
 export class RoundService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(RedisService) private readonly redis: RedisService,
+  ) {}
 
   async getRound(): Promise<Round> {
+    const cached = await this.redis.getJson<Round>(ROUND_CACHE_KEY);
+    if (cached) return this.normalize(cached);
+
     const round = await this.prisma.round.findUnique({ where: { number: 1 } });
     if (!round) {
       throw new InternalServerErrorException("Round is not configured");
     }
+    await this.redis.setJson(ROUND_CACHE_KEY, round, ROUND_CACHE_TTL_SECONDS);
     return round;
   }
 
@@ -41,5 +52,17 @@ export class RoundService {
 
   isOpen(round: Round): boolean {
     return round.status === "ACTIVE";
+  }
+
+  /** Restore Date fields (JSON round-trip through Redis stores them as strings). */
+  private normalize(round: Round): Round {
+    return {
+      ...round,
+      startedAt: round.startedAt ? new Date(round.startedAt) : null,
+      pausedAt: round.pausedAt ? new Date(round.pausedAt) : null,
+      expiresAt: round.expiresAt ? new Date(round.expiresAt) : null,
+      createdAt: new Date(round.createdAt),
+      updatedAt: new Date(round.updatedAt),
+    };
   }
 }

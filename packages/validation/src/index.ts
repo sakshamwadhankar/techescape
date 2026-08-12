@@ -68,7 +68,11 @@ export const wordleFinishSchema = z.object({
 // --- Game: Shadow ----------------------------------------------------------
 
 export const shadowAnswerSchema = z.object({
-  questionId: z.string().uuid("Invalid question id"),
+  questionId: z
+    .string()
+    .trim()
+    .min(1, "Invalid question id")
+    .max(64, "Invalid question id"),
   answer: z.string().trim().min(1, "Answer is required").max(120),
   clientActionId: clientActionIdSchema,
 });
@@ -116,5 +120,6 @@ export type AdminLogin = z.infer<typeof adminLoginSchema>;
 export type WordleGuess = z.infer<typeof wordleGuessSchema>;
 export type WordleFinish = z.infer<typeof wordleFinishSchema>;
 export type ShadowAnswer = z.infer<typeof shadowAnswerSchema>;
+export type ShadowFinish = z.infer<typeof shadowFinishSchema>;
 export type CardsMove = z.infer<typeof cardsMoveSchema>;
 export type RosterImport = z.infer<typeof rosterImportSchema>;

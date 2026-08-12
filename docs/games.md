@@ -77,4 +77,51 @@ First-attempt win = 1000; a 6-attempt win = 500.
 result for already-terminal sessions; it returns `409` while a game is still in
 progress.
 
+## Shadow
+
+Directory: `apps/api/src/games/shadow/`
+
+- `shadow.domain.ts` — pure logic (answer matching, scoring, resolution).
+- `shadow.service.ts` — session orchestration + per-round Redis question cache.
+- `shadow.controller.ts` — `POST /api/games/shadow/*`.
+
+### Rules
+
+- 6 rounds of "Guess the Character by Shadow", 3 attempts per question.
+- Each question exposes an `assetUrl` (served from object storage/CDN, never
+  through NestJS) and an answer `options` list. The correct answer lives only in
+  server-side Redis state and is revealed only after the question resolves.
+- Answers are matched case-insensitively (`matchesAnswer`, trimmed + lowercased).
+- A question resolves on a correct answer **or** when 3 wrong attempts are used;
+  a failed question scores `0` and the game continues to the next question.
+- The game completes when every question is resolved. Expiry → `TIMEOUT` with
+  the score earned so far.
+- The question set is stable for the whole round. The first `start` loads the
+  active questions and caches them in Redis (`shadow:questions:round:<id>`), so
+  500+ concurrent starts read from Redis, not Postgres.
+
+### Scoring
+
+```text
+Per question:
+  1st attempt correct:   100
+  2nd attempt correct:    70
+  3rd attempt correct:    40
+  failed / timeout:        0
+
+Session total = sum of question scores (max 600)
+```
+
+### API
+
+| Endpoint | Body | Response |
+|---|---|---|
+| `POST /api/games/shadow/start` | `{}` | `ShadowStartResponse` |
+| `POST /api/games/shadow/answer` | `{ questionId, answer, clientActionId }` | `ShadowAnswerResponse` |
+| `POST /api/games/shadow/finish` | `{ clientActionId }` | `GameFinishResponse` |
+
+`finish` finalizes an expired session as `TIMEOUT` and returns the stored
+result for already-terminal sessions; it returns `409` while a game is still in
+progress.
+
 See `docs/api.md` for details.

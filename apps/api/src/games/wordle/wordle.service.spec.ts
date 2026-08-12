@@ -66,6 +66,7 @@ function createService() {
       async (_sessionId: string, fn: () => Promise<unknown>) => fn(),
     ),
     isExpired: jest.fn().mockReturnValue(false),
+    remainingTtl: jest.fn().mockReturnValue(1000),
     readState: jest.fn(),
     writeState: jest.fn().mockResolvedValue(undefined),
     recordAction: jest.fn().mockResolvedValue(undefined),

@@ -146,6 +146,15 @@ export class SessionsService {
     return new Date(session.expiresAt).getTime() <= now;
   }
 
+  /** Seconds left until expiry plus a buffer, for state TTLs. */
+  remainingTtl(session: Pick<GameSession, "expiresAt">, now = Date.now()): number {
+    const remainingSec = Math.max(
+      1,
+      Math.ceil((new Date(session.expiresAt).getTime() - now) / 1000),
+    );
+    return remainingSec + SESSION_STATE_TTL_BUFFER_SECONDS;
+  }
+
   async readState<T>(sessionId: string): Promise<T | null> {
     return this.redis.getJson<T>(`state:${sessionId}`);
   }

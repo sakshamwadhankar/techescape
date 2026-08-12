@@ -108,7 +108,7 @@ export interface ShadowAnswerResponse {
   questionScore: number;
   totalCorrect: number;
   questionCount: number;
-  status: "IN_PROGRESS" | "COMPLETED";
+  status: "IN_PROGRESS" | "COMPLETED" | "TIMEOUT";
 }
 
 export interface ShadowResult {

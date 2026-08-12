@@ -132,7 +132,7 @@ export class WordleService {
         await this.sessions.writeState(
           sessionId,
           { ...state, guesses },
-          this.remainingTtl(session),
+          this.sessions.remainingTtl(session),
         );
       } else {
         const timeMs = Date.now() - state.startedAt;
@@ -228,14 +228,6 @@ export class WordleService {
       : ANSWER_CACHE_TTL_SECONDS;
     await this.redis.setJson(key, answer, ttl);
     return answer;
-  }
-
-  private remainingTtl(session: { expiresAt: Date }): number {
-    const remainingSec = Math.max(
-      1,
-      Math.ceil((new Date(session.expiresAt).getTime() - Date.now()) / 1000),
-    );
-    return remainingSec + SESSION_STATE_TTL_BUFFER_SECONDS;
   }
 
   private timeoutGuessResponse(guessCount: number): WordleGuessResponse {

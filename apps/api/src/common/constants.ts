@@ -7,6 +7,7 @@ export const ADMIN_TOKEN_TTL_SECONDS = 2 * 60 * 60;
 export const SESSION_STATE_TTL_BUFFER_SECONDS = 300;
 export const IDEMPOTENCY_TTL_SECONDS = 24 * 60 * 60;
 export const ACTION_LOCK_TTL_MS = 5_000;
+export const ROUND_CACHE_TTL_SECONDS = 5;
 
 export const WORDLE_MAX_ATTEMPTS = 6;
 export const WORDLE_WORD_LENGTH = 5;
