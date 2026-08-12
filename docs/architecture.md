@@ -123,6 +123,7 @@ The admin controls one `Round` (row `number = 1`):
 
 ```text
 IDLE --start--> ACTIVE --pause--> PAUSED --resume--> ACTIVE --end--> ENDED
+ENDED --start--> ACTIVE   (restart: keeps config + scores, refreshes timing)
 ```
 
 - `start` sets `startedAt` + `expiresAt` (`ROUND_DURATION_SECONDS`, default

@@ -171,7 +171,7 @@ export class AdminService {
 
   async startRound(): Promise<AdminRoundStatusResponse> {
     const round = await this.round.getRound();
-    if (round.status !== "IDLE") {
+    if (round.status !== "IDLE" && round.status !== "ENDED") {
       throw new ConflictException(`The round cannot start from status "${round.status}"`);
     }
 

@@ -223,7 +223,26 @@ describe("AdminService", () => {
       expect(res.expiresAt).toBe(new Date(NOW + 1800_000).toISOString());
     });
 
-    it.each(["ACTIVE", "PAUSED", "ENDED"] as const)(
+    it("restarts an ended round (keeps config, refreshes timing)", async () => {
+      const { service, prisma, roundService } = createService();
+      roundService.getRound.mockResolvedValue(makeRound({ status: "ENDED" }));
+      const updated = makeRound({
+        status: "ACTIVE",
+        startedAt: new Date(NOW),
+        expiresAt: new Date(NOW + 1800_000),
+      });
+      prisma.round.update.mockResolvedValue(updated);
+
+      const res = await service.startRound();
+
+      expect(prisma.round.update).toHaveBeenCalledWith({
+        where: { number: 1 },
+        data: { status: "ACTIVE", startedAt: new Date(NOW), expiresAt: new Date(NOW + 1800_000), pausedAt: null },
+      });
+      expect(res.status).toBe("ACTIVE");
+    });
+
+    it.each(["ACTIVE", "PAUSED"] as const)(
       "rejects start from %s",
       async (status) => {
         const { service, roundService } = createService();

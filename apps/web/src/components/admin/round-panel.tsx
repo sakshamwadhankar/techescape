@@ -87,8 +87,12 @@ export function RoundPanel({ round, onRoundChange }: RoundPanelProps) {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button size="sm" disabled={busy || round.status !== "IDLE"} onClick={() => void run("start")}>
-          Start
+        <Button
+          size="sm"
+          disabled={busy || (round.status !== "IDLE" && round.status !== "ENDED")}
+          onClick={() => void run("start")}
+        >
+          {round.status === "ENDED" ? "Restart round" : "Start"}
         </Button>
         <Button
           variant="secondary"

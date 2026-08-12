@@ -329,7 +329,7 @@ All admin routes are under `/api/admin` and require the admin cookie
 | `POST /api/admin/roster/import` | upsert teams from `{ teams: [...] }` |
 | `GET /api/admin/round` | round status + config |
 | `POST /api/admin/round/config` | update game toggles / `wordleAnswer` / `cardsSeed` |
-| `POST /api/admin/round/start` | `IDLE` → `ACTIVE` |
+| `POST /api/admin/round/start` | `IDLE`/`ENDED` → `ACTIVE` (restart after a round ends) |
 | `POST /api/admin/round/pause` | `ACTIVE` → `PAUSED` |
 | `POST /api/admin/round/resume` | `PAUSED` → `ACTIVE`, extends expiry by the pause |
 | `POST /api/admin/round/end` | `ACTIVE`/`PAUSED` → `ENDED` |
@@ -398,7 +398,7 @@ while the round is `ACTIVE`.
 ### `POST /round/start|pause|resume|end`
 
 No body. Each validates the current status and returns the updated round:
-- `start` only from `IDLE`; sets `startedAt` + `expiresAt`
+- `start` from `IDLE` or `ENDED` (restart); sets `startedAt` + `expiresAt`
   (`ROUND_DURATION_SECONDS`, default 30 min).
 - `pause` only from `ACTIVE`; records `pausedAt`.
 - `resume` only from `PAUSED`; shifts `expiresAt` by the pause duration so
