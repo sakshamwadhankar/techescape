@@ -286,3 +286,139 @@ Body: `{ "clientActionId": "fin-0001" }`.
 ```json
 { "score": 360, "timeMs": 63147 }
 ```
+
+## Leaderboard
+
+| Endpoint | Auth | Description |
+|---|---|---|
+| `GET /api/leaderboard?limit=50` | public | top ranked teams (limit 1–100, default 50) |
+| `GET /api/leaderboard/me` | player | the team's rank + entry |
+
+The leaderboard aggregates terminal sessions (`COMPLETED` and `TIMEOUT`) per
+team: `totalScore` = sum of scores, `totalTimeMs` = sum of timeMs,
+`gamesCompleted` = count of terminal games. Teams with no terminal session do
+not appear. Order: `totalScore` desc, then `totalTimeMs` asc, then team name
+asc; `rank` is 1-based.
+
+```json
+{
+  "entries": [
+    { "rank": 1, "teamCode": "TEAMA", "teamName": "Team Alpha", "totalScore": 1000, "totalTimeMs": 36, "gamesCompleted": 1 }
+  ],
+  "totalTeams": 2
+}
+```
+
+Results are cached in Redis (`leaderboard:round:<id>`) for a few seconds so
+concurrent reads don't hit Postgres. `GET /me` computes a fresh full ranking
+for the authenticated team:
+
+```json
+{ "rank": 1, "entry": { "rank": 1, "teamCode": "TEAMA", "teamName": "Team Alpha", "totalScore": 1000, "totalTimeMs": 36, "gamesCompleted": 1 } }
+```
+
+`{ "rank": null, "entry": null }` when the team has not finished any game.
+
+## Admin
+
+All admin routes are under `/api/admin` and require the admin cookie
+(`AdminAuthGuard`).
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/admin/roster/import` | upsert teams from `{ teams: [...] }` |
+| `GET /api/admin/round` | round status + config |
+| `POST /api/admin/round/config` | update game toggles / `wordleAnswer` / `cardsSeed` |
+| `POST /api/admin/round/start` | `IDLE` → `ACTIVE` |
+| `POST /api/admin/round/pause` | `ACTIVE` → `PAUSED` |
+| `POST /api/admin/round/resume` | `PAUSED` → `ACTIVE`, extends expiry by the pause |
+| `POST /api/admin/round/end` | `ACTIVE`/`PAUSED` → `ENDED` |
+| `GET /api/admin/teams` | roster with per-game session rows |
+| `POST /api/admin/teams/reset` | allow a team to replay a finished game |
+
+### `POST /roster/import`
+
+Body:
+
+```json
+{
+  "teams": [
+    { "code": "TEAMA", "name": "Team Alpha", "memberNames": ["A1", "A2"], "room": "A101" }
+  ]
+}
+```
+
+`code` becomes the player's `accessCode` (lowercased) used with `EVENT_PIN` at
+login. Re-importing an existing `code` updates its name/members/room; unchanged
+rows are skipped. Errors:
+- `400` — two codes lowercasing to the same access code, or a code whose access
+  code already belongs to a different team.
+
+Response:
+
+```json
+{ "created": 2, "updated": 0, "total": 2 }
+```
+
+### `GET /round`
+
+```json
+{
+  "number": 1,
+  "status": "IDLE",
+  "startedAt": null,
+  "pausedAt": null,
+  "expiresAt": null,
+  "wordleEnabled": true,
+  "shadowEnabled": true,
+  "cardsEnabled": true,
+  "wordleAnswer": null,
+  "cardsSeed": null
+}
+```
+
+### `POST /round/config`
+
+Body (any subset):
+
+```json
+{
+  "wordleEnabled": true,
+  "shadowEnabled": true,
+  "cardsEnabled": true,
+  "wordleAnswer": "spide",
+  "cardsSeed": 123
+}
+```
+
+`wordleAnswer` must be exactly 5 letters (lowercased); `cardsSeed` must be a
+positive int. Pass `null` to clear either. Returns the updated round. `409`
+while the round is `ACTIVE`.
+
+### `POST /round/start|pause|resume|end`
+
+No body. Each validates the current status and returns the updated round:
+- `start` only from `IDLE`; sets `startedAt` + `expiresAt`
+  (`ROUND_DURATION_SECONDS`, default 30 min).
+- `pause` only from `ACTIVE`; records `pausedAt`.
+- `resume` only from `PAUSED`; shifts `expiresAt` by the pause duration so
+  paused time is not counted.
+- `end` only from `ACTIVE`/`PAUSED`.
+
+All transitions invalidate the cached round so players see the new state.
+
+### `GET /teams`
+
+Every team with its sessions (game, status, timestamps, score, timeMs) and a
+`totalScore` sum.
+
+### `POST /teams/reset`
+
+Body: `{ "teamId": "<cuid>", "game": "WORDLE" | "SHADOW" | "CARDS" | undefined }`.
+
+Marks finished sessions (`COMPLETED`/`TIMEOUT`) `ABANDONED` and clears their
+state, so the team can replay (in-progress sessions are untouched).
+
+```json
+{ "reset": 1 }
+```

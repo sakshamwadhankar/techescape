@@ -177,8 +177,64 @@ export interface LeaderboardResponse {
 }
 
 export interface LeaderboardMeResponse {
-  rank: number;
-  entry: LeaderboardEntry;
+  rank: number | null;
+  entry: LeaderboardEntry | null;
+}
+
+// --- Admin ------------------------------------------------------------------
+
+export type RoundStatus = "IDLE" | "ACTIVE" | "PAUSED" | "ENDED";
+
+export interface AdminRoundStatusResponse {
+  number: number;
+  status: RoundStatus;
+  startedAt: string | null;
+  pausedAt: string | null;
+  expiresAt: string | null;
+  wordleEnabled: boolean;
+  shadowEnabled: boolean;
+  cardsEnabled: boolean;
+  wordleAnswer: string | null;
+  cardsSeed: number | null;
+}
+
+export interface AdminRoundConfigInput {
+  wordleEnabled?: boolean;
+  shadowEnabled?: boolean;
+  cardsEnabled?: boolean;
+  wordleAnswer?: string | null;
+  cardsSeed?: number | null;
+}
+
+export interface RosterImportResponse {
+  created: number;
+  updated: number;
+  total: number;
+}
+
+export interface AdminSessionRow {
+  game: GameKind;
+  status: SessionStatus;
+  startedAt: string | null;
+  expiresAt: string | null;
+  finishedAt: string | null;
+  score: number | null;
+  timeMs: number | null;
+}
+
+export interface AdminTeamRow {
+  id: string;
+  code: string;
+  name: string;
+  memberNames: string[];
+  room: string | null;
+  sessions: AdminSessionRow[];
+  totalScore: number;
+}
+
+export interface AdminTeamsResponse {
+  teams: AdminTeamRow[];
+  total: number;
 }
 
 // --- Errors ----------------------------------------------------------------

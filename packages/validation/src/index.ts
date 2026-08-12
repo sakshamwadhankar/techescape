@@ -111,9 +111,36 @@ export const rosterImportSchema = z.object({
   teams: z.array(rosterEntrySchema).min(1, "At least one team is required").max(2000),
 });
 
-// --- Misc ------------------------------------------------------------------
+// --- Admin: round config ----------------------------------------------------
+
+const wordleAnswerSchema = z
+  .string()
+  .trim()
+  .regex(/^[a-zA-Z]+$/, "Wordle answer must contain only letters")
+  .transform((s) => s.toLowerCase())
+  .refine((s) => s.length === 5, {
+    message: "Wordle answer must be exactly 5 letters",
+    path: ["wordleAnswer"],
+  });
+
+export const adminRoundConfigSchema = z.object({
+  wordleEnabled: z.boolean().optional(),
+  shadowEnabled: z.boolean().optional(),
+  cardsEnabled: z.boolean().optional(),
+  wordleAnswer: wordleAnswerSchema.nullable().optional(),
+  cardsSeed: z.number().int().min(1).max(2 ** 31 - 1).nullable().optional(),
+});
+
+// --- Admin: team reset ------------------------------------------------------
 
 export const gameKindSchema = z.enum(GAME_KINDS);
+
+export const adminTeamResetSchema = z.object({
+  teamId: z.string().trim().min(1, "teamId is required").max(64),
+  game: gameKindSchema.optional(),
+});
+
+// --- Misc ------------------------------------------------------------------
 
 export type PlayerLogin = z.infer<typeof playerLoginSchema>;
 export type AdminLogin = z.infer<typeof adminLoginSchema>;
@@ -124,3 +151,5 @@ export type ShadowFinish = z.infer<typeof shadowFinishSchema>;
 export type CardsMove = z.infer<typeof cardsMoveSchema>;
 export type CardsFinish = z.infer<typeof cardsFinishSchema>;
 export type RosterImport = z.infer<typeof rosterImportSchema>;
+export type AdminRoundConfig = z.infer<typeof adminRoundConfigSchema>;
+export type AdminTeamReset = z.infer<typeof adminTeamResetSchema>;

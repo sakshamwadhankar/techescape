@@ -13,6 +13,12 @@ const envSchema = z.object({
     .min(30)
     .max(3600)
     .default(300),
+  ROUND_DURATION_SECONDS: z.coerce
+    .number()
+    .int()
+    .min(60)
+    .max(86400)
+    .default(1800),
   ADMIN_USERNAME: z.string().min(1).default("admin"),
   ADMIN_PASSWORD: z.string().optional(),
   ADMIN_PASSWORD_HASH: z.string().optional(),

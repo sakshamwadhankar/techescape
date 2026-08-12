@@ -54,6 +54,11 @@ export class RoundService {
     return round.status === "ACTIVE";
   }
 
+  /** Drop the cached round so the next read hits Postgres. */
+  async invalidateCache(): Promise<void> {
+    await this.redis.del(ROUND_CACHE_KEY);
+  }
+
   /** Restore Date fields (JSON round-trip through Redis stores them as strings). */
   private normalize(round: Round): Round {
     return {
