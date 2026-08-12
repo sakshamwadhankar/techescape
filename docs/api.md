@@ -194,3 +194,95 @@ Body: `{ "clientActionId": "fin-0001" }`.
 ```json
 { "score": 600, "timeMs": 328 }
 ```
+
+## Cards
+
+Base: `/api/games/cards` — all routes require the player cookie.
+
+### `POST /start`
+
+Body: `{}`.
+
+Starts (or re-opens) the Cards session for the team. Idempotent per
+`(teamId, game)`: while a session is `ACTIVE` the same one is returned; a
+completed game cannot be restarted.
+
+Returns the round's 12 card positions (ids only — fronts are hidden) plus the
+shared back asset. The layout is the same for every team (seeded shuffle, deck
+cached in Redis after the first load).
+
+```json
+{
+  "sessionId": "cmsq17znv0001z9efllqoqgqx",
+  "expiresAt": "2026-08-12T12:10:00.000Z",
+  "cards": [
+    { "id": "a00c6eca-b097-430c-b799-b1fdcf6a22e1", "index": 0 }
+  ],
+  "backAssetUrl": "https://cdn.example.com/assets/cards/back.svg"
+}
+```
+
+Errors: `409` when the round is closed/paused, the game is disabled, or the
+game was already completed.
+
+### `POST /move`
+
+Body:
+
+```json
+{ "cardId": "a00c6eca-b097-430c-b799-b1fdcf6a22e1", "clientActionId": "m1" }
+```
+
+`cardId` must be a uuid of one of the board cards. `clientActionId` is the
+idempotency key (8–64 chars, alphanumeric + `-`); replaying one returns the
+cached response.
+
+A move flips one card. The front asset is revealed only on a flip.
+
+```json
+{
+  "moveId": "m1",
+  "cardId": "a00c6eca-b097-430c-b799-b1fdcf6a22e1",
+  "frontAssetUrl": "https://cdn.example.com/assets/cards/black-cat.svg",
+  "revealed": true,
+  "matched": false,
+  "matchCompleted": false,
+  "unmatchedFlipBack": false,
+  "state": {
+    "moves": 1,
+    "revealed": [0],
+    "matched": [],
+    "matchedPairs": 0,
+    "totalPairs": 6,
+    "status": "IN_PROGRESS"
+  }
+}
+```
+
+Response flags per flip:
+- `revealed: true` — the flipped card is now face-up (first card of an attempt).
+- `matched: true` + `matchCompleted: true` — the flip resolved a pair; both
+  cards stay face-up.
+- `unmatchedFlipBack: true` — the attempt mismatched; both cards flip back.
+
+`state.status`: `IN_PROGRESS` | `COMPLETED` | `TIMEOUT`. The final pair
+resolves the whole game → `COMPLETED` and the total score is persisted.
+
+Errors:
+- `400` — unknown `cardId` or malformed body.
+- `409` — card already matched, card already revealed, session busy (lock), or
+  game already completed.
+- `404` — no session for this team (start first).
+
+### `POST /finish`
+
+Body: `{ "clientActionId": "fin-0001" }`.
+
+- Expired session → finalized as `TIMEOUT`; returns `{ score, timeMs }` with the
+  score earned so far.
+- Already terminal → returns the stored `{ score, timeMs }`.
+- In progress and not expired → `409 Conflict`.
+
+```json
+{ "score": 360, "timeMs": 63147 }
+```

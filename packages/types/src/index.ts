@@ -149,7 +149,7 @@ export interface CardsStatePublic {
   matched: string[];
   matchedPairs: number;
   totalPairs: number;
-  status: "IN_PROGRESS" | "COMPLETED";
+  status: "IN_PROGRESS" | "COMPLETED" | "TIMEOUT";
 }
 
 export interface CardsResult {

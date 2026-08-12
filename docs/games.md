@@ -124,4 +124,51 @@ Session total = sum of question scores (max 600)
 result for already-terminal sessions; it returns `409` while a game is still in
 progress.
 
+## Cards
+
+Directory: `apps/api/src/games/cards/`
+
+- `cards.domain.ts` — pure logic (seeded deck, flip state machine, scoring).
+- `cards.service.ts` — session orchestration + per-round Redis deck cache.
+- `cards.controller.ts` — `POST /api/games/cards/*`.
+
+### Rules
+
+- Memory match: 6 pairs (the six Spider-Man characters) on a 12-card board.
+- A move is a single flip (`POST /move` with a `cardId`). Two face-up cards
+  resolve an attempt: matching `pairId`s keep the pair face-up (`matched`),
+  otherwise both flip back (`unmatchedFlipBack`).
+- A card that is already matched or currently face-up cannot be flipped again
+  (`409`). Card front assets are served from object storage/CDN and revealed
+  only after a card is flipped — the server never sends them up front.
+- The board is identical for every team: a seeded shuffle
+  (`cards.domain.mulberry32`). The seed is `Round.cardsSeed`, or a one-time
+  random pick cached in Redis (`cards:seed:round:<id>`) when unset. The built
+  deck is cached per round (`cards:deck:round:<id>`) so 500+ concurrent starts
+  read from Redis, not Postgres.
+- Completing the last pair → `COMPLETED`. Expiry → `TIMEOUT` with the score
+  earned so far.
+
+### Scoring
+
+```text
+score = max(0, 100 × matchedPairs − 10 × max(0, moves − 2 × matchedPairs))
+```
+
+A perfect game is 12 moves → 600. Each extra move costs 10 points (per pair
+found); the score floors at 0. Mid-game (timeout) the formula credits the pairs
+matched so far.
+
+### API
+
+| Endpoint | Body | Response |
+|---|---|---|
+| `POST /api/games/cards/start` | `{}` | `CardsStartResponse` |
+| `POST /api/games/cards/move` | `{ cardId, clientActionId }` | `CardsMoveResponse` |
+| `POST /api/games/cards/finish` | `{ clientActionId }` | `GameFinishResponse` |
+
+`finish` finalizes an expired session as `TIMEOUT` and returns the stored
+result for already-terminal sessions; it returns `409` while a game is still in
+progress.
+
 See `docs/api.md` for details.

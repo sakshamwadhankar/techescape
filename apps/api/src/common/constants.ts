@@ -14,3 +14,13 @@ export const WORDLE_WORD_LENGTH = 5;
 export const SHADOW_MAX_ATTEMPTS_PER_QUESTION = 3;
 export const CARDS_PAIR_COUNT = 6;
 export const CARDS_PERFECT_MOVES = CARDS_PAIR_COUNT * 2;
+export const CARDS_SCORE_PER_PAIR = 100;
+export const CARDS_MOVE_PENALTY = 10;
+export const CARDS_DECK_SLUGS = [
+  "black-cat",
+  "doctor-octopus",
+  "green-goblin",
+  "miles-morales",
+  "spiderman",
+  "venom",
+] as const;

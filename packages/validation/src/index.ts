@@ -122,4 +122,5 @@ export type WordleFinish = z.infer<typeof wordleFinishSchema>;
 export type ShadowAnswer = z.infer<typeof shadowAnswerSchema>;
 export type ShadowFinish = z.infer<typeof shadowFinishSchema>;
 export type CardsMove = z.infer<typeof cardsMoveSchema>;
+export type CardsFinish = z.infer<typeof cardsFinishSchema>;
 export type RosterImport = z.infer<typeof rosterImportSchema>;
