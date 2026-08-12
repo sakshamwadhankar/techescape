@@ -1,0 +1,26 @@
+{
+  "name": "spiderman-round-i",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Spider-Man themed IEEE event platform (Tech Escape 3.0 Round 1)",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:up": "docker compose up -d postgres redis",
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @spiderman/db migrate",
+    "db:seed": "pnpm --filter @spiderman/db seed",
+    "db:studio": "pnpm --filter @spiderman/db studio"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.5.4"
+  }
+}

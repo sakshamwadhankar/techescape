@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Game {
+  WORDLE
+  SHADOW
+  CARDS
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  TIMEOUT
+  ABANDONED
+}
+
+enum RoundStatus {
+  IDLE
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+// A registered team. Identity is derived from `code` + `accessCode`.
+model Team {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  accessCode  String   @unique
+  name        String
+  memberNames String[]
+  room        String?
+  createdAt   DateTime @default(now())
+
+  sessions GameSession[]
+}
+
+// Authoritative record of one team playing one game. `@@unique([teamId, game])`
+// guarantees a team can only have a single session per game (idempotency).
+model GameSession {
+  id        String        @id @default(cuid())
+  teamId    String
+  game      Game
+  status    SessionStatus @default(ACTIVE)
+  startedAt DateTime
+  expiresAt DateTime
+  finishedAt DateTime?
+  score     Int           @default(0)
+  timeMs    Int?
+  result    Json?
+  // Idempotency key for the finish request — null while active.
+  finishKey String?       @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  team    Team         @relation(fields: [teamId], references: [id])
+  actions GameAction[]
+
+  @@unique([teamId, game])
+  @@index([game, status])
+  @@index([status])
+}
+
+// Every player action is persisted for audit, replay-safety and mid-session
+// state reconstruction if the Redis cache is lost.
+model GameAction {
+  id             String   @id @default(cuid())
+  sessionId      String
+  clientActionId String   @unique
+  type           String
+  payload        Json
+  result         Json
+  createdAt      DateTime @default(now())
+
+  session GameSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+}
+
+// The competitive round. Admin controls its lifecycle.
+model Round {
+  id            String      @id @default(cuid())
+  number        Int         @unique @default(1)
+  status        RoundStatus @default(IDLE)
+  startedAt     DateTime?
+  pausedAt      DateTime?
+  expiresAt     DateTime?
+  wordleEnabled Boolean     @default(true)
+  shadowEnabled Boolean     @default(true)
+  cardsEnabled  Boolean     @default(true)
+  // Same answer for every team this round. NEVER returned to clients.
+  wordleAnswer String?
+  // Seeded shuffle so every team sees the same card layout.
+  cardsSeed    Int?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+// Question bank for the Shadow game. `assetUrl` is a CDN/object-storage URL.
+model ShadowQuestion {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  character     String
+  assetUrl      String
+  // Array of option strings; `correctAnswer` is one of them.
+  options       Json
+  correctAnswer String
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
