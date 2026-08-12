@@ -17,7 +17,7 @@ async function bootstrap(): Promise<void> {
     .map((o) => o.trim())
     .filter(Boolean);
 
-  app.enableCors({ origin: origins, credentials: true });
+  app.enableCors({ origin: origins, credentials: true, maxAge: 3600 });
 
   app.useGlobalFilters(new AllExceptionsFilter());
 

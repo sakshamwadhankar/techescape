@@ -18,7 +18,7 @@ This is a **Turborepo monorepo**; the backend is a **modular monolith**.
 
 ```text
 apps/
-  web/                 # Next.js student + admin UI (not yet implemented)
+  web/                 # Next.js student + admin UI (client components, direct-fetch)
   api/                 # NestJS API
 packages/
   db/                  # Prisma schema + client
@@ -32,6 +32,35 @@ docs/
   api.md               # endpoint reference
   deployment.md        # (planned) infra + deployment
 ```
+
+## Web app (`apps/web`)
+
+Next.js (App Router) client for players and admins. It holds **no game logic** —
+every page is a client component that calls the API directly and renders the
+response.
+
+- **API client** (`src/lib/api.ts`): typed wrapper around `fetch` with
+  `credentials: "include"`. Base URL from `NEXT_PUBLIC_API_URL` (default
+  `http://localhost:4000/api`). No Next.js rewrites or server proxy — the
+  browser talks to the API straight through the CDN. CORS is configured with
+  `maxAge` so preflight requests are cached.
+- **Auth hooks** (`src/lib/auth.ts`): `usePlayerSession` / `useRequirePlayer`
+  and `useAdminSession` / `useRequireAdmin` probe `GET /auth/me` /
+  `GET /admin/round` and redirect to `/login` or `/admin/login` on 401.
+- **Player routes**: `/` (home + session status), `/login`, `/play/wordle`,
+  `/play/shadow`, `/play/cards`, `/leaderboard`.
+- **Admin routes**: `/admin/login`, `/admin` (round control, config, roster
+  import, team resets). The guard lives in the dashboard page, not the layout,
+  so `/admin/login` stays reachable.
+- **Game screens** (`src/components/{wordle,shadow,cards}`): start via the API,
+  call the server for every action, and only call `finish` once the terminal
+  status is known (or the `expiresAt` countdown, which is visual only, hits
+  zero). Countdown/timer, guesses, flips, and attempts are all rendered from
+  server responses.
+- **Shared UI** comes from `packages/ui`; `packages/types` provides the DTOs.
+- Testing: Vitest (`src/lib/*.spec.ts`) for the API client and pure game
+  helpers. The web app runs `lint`, `typecheck`, `test`, and `build` in the
+  Turbo pipeline.
 
 ## Request flow
 
