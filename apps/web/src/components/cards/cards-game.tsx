@@ -11,7 +11,7 @@ import type {
   GameFinishResponse,
 } from "@spiderman/types";
 import { actionId, api, ApiError } from "@/lib/api";
-import { buildCardTiles } from "@/lib/game-helpers";
+import { buildCardTiles, cardIndexById } from "@/lib/game-helpers";
 
 interface CardsState {
   start: CardsStartResponse | null;
@@ -54,7 +54,7 @@ export function CardsGame() {
   const flip = useCallback(
     async (card: CardPublic) => {
       const { board, start, busy, result } = state;
-      if (!start || busy || result || !board) return;
+      if (!start || busy || result) return;
 
       const tile = buildCardTiles(start.cards, board).find(
         (t) => t.card.id === card.id,
@@ -64,16 +64,34 @@ export function CardsGame() {
       setState((s) => ({ ...s, busy: true, error: null }));
       try {
         const res: CardsMoveResponse = await api.cardsMove(card.id, actionId("cflip"));
-        setState((s) => ({
-          ...s,
-          board: res.state,
-          fronts: { ...s.fronts, [card.id]: res.frontAssetUrl },
-          last: res,
-          busy: false,
-        }));
-        if (res.state.status === "COMPLETED") {
-          const finish = await api.cardsFinish(actionId("cfin"));
-          setState((s) => ({ ...s, result: finish }));
+
+        if (res.unmatchedFlipBack && board) {
+          const newCardIndex = cardIndexById(start.cards, card.id);
+          const preview: CardsStatePublic = {
+            ...res.state,
+            revealed: Array.from(new Set([...board.revealed, newCardIndex])),
+          };
+          setState((s) => ({
+            ...s,
+            board: preview,
+            fronts: { ...s.fronts, [card.id]: res.frontAssetUrl },
+            last: res,
+          }));
+          setTimeout(() => {
+            setState((s) => ({ ...s, board: res.state, busy: false }));
+          }, 2000);
+        } else {
+          setState((s) => ({
+            ...s,
+            board: res.state,
+            fronts: { ...s.fronts, [card.id]: res.frontAssetUrl },
+            last: res,
+            busy: false,
+          }));
+          if (res.state.status === "COMPLETED") {
+            const finish = await api.cardsFinish(actionId("cfin"));
+            setState((s) => ({ ...s, result: finish }));
+          }
         }
       } catch (err) {
         setState((s) => ({
