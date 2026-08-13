@@ -14,6 +14,94 @@ This is a **Turborepo monorepo**. Read this file and inspect existing code befor
 
 ---
 
+## Project Phases & Status
+
+Read this before starting work — it records what is done and what remains.
+
+### Phase A — Core platform (DONE)
+
+* All three games implemented with server-authoritative logic: Wordle,
+  Shadow, Cards (100 cards / 50 pairs), each with controller, service, domain,
+  DTOs, module, and tests under `apps/api/src/games/<game>/`.
+* Auth (admin + player via event PIN), sessions, scoring, leaderboard, and
+  admin APIs (round lifecycle, team/session reset) are live and verified.
+* Games are one-shot per team per round: a team that started/finished a game
+  gets `409` on `start` until an admin reset (`POST /admin/teams/reset`, which
+  only resets COMPLETED/TIMEOUT sessions — not ACTIVE ones).
+* Verified game behaviors (see `docs/games.md` and service specs):
+  * Wordle: 6 guesses; auto-completes on the winning guess; `finish` after
+    completion returns the stored score instead of erroring.
+  * Shadow: exactly 6 questions; auto-completes only when ALL questions are
+    resolved (answering one is not enough).
+  * Cards: 100 cards / 50 pairs, revealed fronts tracked in Redis
+    `state:<sessionId>`; moves return `409` on already-revealed/matched cards.
+* Session lifecycle: `createSession` reopens ABANDONED → ACTIVE; scoring and
+  completion are idempotent (`completeSession`). Leaderboard responses:
+  `GET /leaderboard` → `{ entries, totalTeams }`, `GET /leaderboard/me` →
+  `{ rank, entry }` (entry may be null).
+* E2E walkthrough (wordle → shadow → cards → leaderboard + admin reset +
+  rate-limit header) passes 28/28 checks against a live round.
+
+### Phase B — Security hardening (DONE)
+
+* `.env` is gitignored; dev secrets were rotated; admin supports bcrypt
+  `ADMIN_PASSWORD_HASH` for production (leave `ADMIN_PASSWORD` empty then).
+* Rate limiting via `ThrottlerGuard`, env-configurable: `RATE_LIMIT_MAX`
+  (default 400 req/min/IP), `RATE_LIMIT_TTL` (default 60s), `TRUST_PROXY`.
+  `TRUST_PROXY=true` is required behind a proxy/CDN (uses `X-Forwarded-For`).
+  Note: the throttler is in-memory per API instance, not Redis-backed.
+* Verified: login returns `x-ratelimit-limit: 400` with defaults; chatty
+  clients get `429` once the window is exhausted.
+
+### Phase C — Load testing (PARTIAL — see "Next steps")
+
+* `scripts/load/spiderman.js` (k6) ramps 100 → 250 → 500 → 750 → 1000 VUs.
+  One-shot per team; each VU plays exactly one game (`GAME=cards|wordle|shadow|leaderboard`).
+* One scenario (cards @ 1000 VUs) ran: **error rate 0.26% (pass, < 1%)**.
+  Residual errors were harness bugs (409s), since fixed in the script.
+* **p95 < 300 ms is NOT yet validated** — the dev host was too saturated
+  (API + Postgres + Redis + k6 shared one machine). See "Next steps".
+* Run sequence (`docs/architecture.md` → "Load-test run sequence"):
+  1. `node scripts/load/reset-sessions.mjs --prefix load`
+  2. `node scripts/load/seed-teams.mjs --count 1000 --prefix load`
+  3. `docker run ... grafana/k6 run /scripts/spiderman.js` (per game)
+  Between scenarios re-reset sessions or seed a fresh prefix. Raise
+  `RATE_LIMIT_MAX` during runs and restore to 400 afterwards.
+
+### Phase D — Tooling & docs (DONE)
+
+* `scripts/load/seed-teams.mjs` — idempotent seeding of load teams
+  (`load-0001..load-1000` by default; `--count`, `--prefix`; skips existing
+  access codes; teams pinned by the current `EVENT_PIN`). Tested.
+* `scripts/load/reset-sessions.mjs` — deletes `GameAction` + `GameSession`
+  rows and Redis `state:`/`idem:`/`lock:` keys for a prefix
+  (`--dry-run` supported). Scoped — real teams are never touched. Tested.
+* `docs/deployment.md` — single-host deployment (Caddy TLS → API 4000 + web
+  3000), production env checklist, event-day runbook, scaling-out notes.
+* Both helper scripts resolve `@spiderman/db`/`ioredis` via `createRequire`
+  anchored at `apps/api/package.json` — do not add new deps to run them.
+
+### Known fixes already applied
+
+* `resetSession` now also clears the idempotency cache
+  (`idem:<sessionId>:*`) via a SCAN-based `RedisService.delPattern`,
+  so replayed actions after an admin team reset use fresh cache entries.
+  Root-caused by a stale cached `WON` response after an admin reset.
+
+### Next steps (hand off to a new agent)
+
+1. **Run the full k6 suite on a clean environment** (cards, wordle, shadow,
+   leaderboard at 1000 VUs) per `docs/architecture.md` and validate
+   p95 < 300 ms / error < 1%. The k6 host must not share CPU/memory with the
+   API. Raise `RATE_LIMIT_MAX` during runs and restore to 400 afterwards.
+2. **Deploy per `docs/deployment.md`** and exercise the event-day runbook
+   (smoke test each game, verify leaderboard, monitor p95).
+3. **Event-day cleanup**: remove load teams (`accessCode load-%` /
+   `testload-%`), set `RATE_LIMIT_MAX=400`, confirm the round is ACTIVE and
+   seeded with real content.
+
+---
+
 ## Stack
 
 * Package manager: **pnpm**
