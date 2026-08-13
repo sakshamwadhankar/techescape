@@ -91,10 +91,22 @@ export class SessionsService {
       });
       sessionId = existing.id;
     } else {
-      const created = await this.prisma.gameSession.create({
-        data: { teamId, game, startedAt, expiresAt },
-      });
-      sessionId = created.id;
+      try {
+        const created = await this.prisma.gameSession.create({
+          data: { teamId, game, startedAt, expiresAt },
+        });
+        sessionId = created.id;
+      } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          // A race condition occurred where the session was created between our check and create.
+          // Retry to fetch and return the correct state.
+          return this.createSession(teamId, game, initialState, durationSeconds);
+        }
+        throw error;
+      }
     }
 
     await this.redis.setJson(

@@ -1,13 +1,3 @@
-#!/usr/bin/env node
-// Seeds synthetic load-test teams: accessCode `load-0001`..`load-N`.
-// Idempotent: existing load teams are left untouched.
-//
-// Usage:
-//   node scripts/load/seed-teams.mjs [--count 1000] [--prefix load]
-//
-// Note: load teams share the event PIN (see .env EVENT_PIN). They are
-// intended for load testing only — remove before the real event.
-
 import { readFileSync } from "fs";
 import { createRequire } from "module";
 import { dirname, join } from "path";
