@@ -225,9 +225,44 @@ access-code clashes with existing teams.
 - Before the event: load-test 100 → 250 → 500 → 750 → 1000 concurrent users.
   Target p95 < 300 ms, error rate < 1%.
 
+### Load testing (k6)
+
+`scripts/load/spiderman.js` is a k6 script that ramps to 1000 virtual users
+against a running API. Each VU plays exactly one valid game (the API forbids
+restarting a finished game, so teams must be fresh per run):
+
+```sh
+# run against a local API
+docker run --rm \
+  --add-host host.docker.internal:host-gateway \
+  -v "$PWD/scripts/load:/scripts" \
+  -e BASE_URL=http://host.docker.internal:4000/api \
+  -e GAME=cards|wordle|shadow|leaderboard \
+  -e ACCESS_PREFIX=load \
+  -e EVENT_PIN="$(node -e '... read EVENT_PIN from .env ...')" \
+  grafana/k6 run /scripts/spiderman.js
+```
+
+Notes learned from the first load-test round:
+
+- Games are one-shot: a team that already started (or finished) a game gets
+  `409` on `start`. Seed fresh teams (e.g. `load-1..load-1000` with access codes
+  `load-N`, pinned by the current `EVENT_PIN`) and reset their sessions between
+  scenarios. The deck/questions/round caches are per-round.
+- k6 reads cookies via `response.cookies` (e.g.
+  `res.cookies["spm_access_token"][0].value`), not `response.headers["set-cookie"]`.
+- The throttler counts per IP — run k6 and the API on different hosts (or accept
+  the shared NAT) so rate limiting does not skew results; raise `RATE_LIMIT_MAX`
+  during load runs and restore it afterwards.
+- The load generator must not share CPU/memory with the API. On a constrained
+  Docker Desktop VM the k6 VUs starve the API and inflate p95; validate latency
+  on an idle machine or the real deployment.
+
 ## Security
 
 - Answers are never returned before submission (wordle answer, shadow correct
   answer, cards fronts).
 - No secrets in the repo; all credentials via env vars (`apps/api/src/config/env.ts`).
-- Rate limiting via `ThrottlerGuard` (400 req/min default).
+- Rate limiting via `ThrottlerGuard` (`RATE_LIMIT_MAX` req/min per IP, default
+  400). Limits are env-configurable; set `TRUST_PROXY=true` when deployed behind
+  a CDN (e.g. Cloudflare) so per-client rate limiting uses `X-Forwarded-For`.

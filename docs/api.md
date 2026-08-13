@@ -1,7 +1,8 @@
 # API
 
 NestJS API at `apps/api/src`. All routes are under the `/api` prefix and
-protected by `ThrottlerGuard` (400 req/min default).
+protected by `ThrottlerGuard` (`RATE_LIMIT_MAX` req/min per IP, default 400,
+window `RATE_LIMIT_TTL` seconds).
 
 Authentication uses HTTP-only cookies:
 - `spm_access_token` — player (issued by `POST /api/auth/player/login`).

@@ -29,6 +29,17 @@ const envSchema = z.object({
   CORS_ORIGINS: z.string().default("http://localhost:3000"),
   WEB_ORIGIN: z.string().default("http://localhost:3000"),
   ASSET_CDN_URL: z.string().default(""),
+  RATE_LIMIT_TTL: z.coerce.number().int().min(1).max(3600).default(60),
+  RATE_LIMIT_MAX: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(1_000_000)
+    .default(400),
+  TRUST_PROXY: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
 });
 
 export type Env = z.infer<typeof envSchema>;

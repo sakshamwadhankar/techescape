@@ -19,6 +19,10 @@ async function bootstrap(): Promise<void> {
 
   app.enableCors({ origin: origins, credentials: true, maxAge: 3600 });
 
+  if (config.get<boolean>("TRUST_PROXY")) {
+    app.getHttpAdapter().getInstance().set("trust proxy", 1);
+  }
+
   app.useGlobalFilters(new AllExceptionsFilter());
 
   const port = config.get<number>("API_PORT", 4000);
