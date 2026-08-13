@@ -44,10 +44,19 @@ pnpm dev            # api on :4000, web on :3000
 | `pnpm db:up`        | Start Postgres + Redis containers      |
 | `pnpm db:migrate`   | Apply Prisma migrations                |
 | `pnpm db:seed`      | Seed wordlist, questions and deck      |
+| `pnpm openapi:gen`  | Regenerate `docs/openapi.json`         |
 
 ## Documentation
 
-See [docs/](docs/) for architecture, games, API and deployment guides.
+See [docs/](docs/) for architecture, games, API and deployment guides:
+
+- [docs/architecture.md](docs/architecture.md) — system architecture and principles
+- [docs/games.md](docs/games.md) — game rules and scoring
+- [docs/frontend.md](docs/frontend.md) — API endpoints for frontend integration
+- [docs/api.md](docs/api.md) — authoritative backend API reference
+- [docs/openapi.json](docs/openapi.json) — machine-readable OpenAPI 3.0 spec
+- [docs/design.md](docs/design.md) — product/UX context for UI and UX designers
+- [docs/deployment.md](docs/deployment.md) — deployment and event-day runbook
 
 ## Security notes
 

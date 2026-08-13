@@ -17,7 +17,8 @@
     "db:down": "docker compose down",
     "db:migrate": "pnpm --filter @spiderman/db migrate",
     "db:seed": "pnpm --filter @spiderman/db seed",
-    "db:studio": "pnpm --filter @spiderman/db studio"
+    "db:studio": "pnpm --filter @spiderman/db studio",
+    "openapi:gen": "pnpm --filter @spiderman/api openapi:gen"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

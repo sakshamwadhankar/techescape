@@ -1,0 +1,2185 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/auth/player/login": {
+      "post": {
+        "description": "Logs a team in with its access code and the shared event PIN; sets the `spm_access_token` cookie.",
+        "operationId": "playerLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlayerLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerLoginResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Wrong access code or PIN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Player login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/player/logout": {
+      "post": {
+        "description": "Clears the player cookie.",
+        "operationId": "logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Player logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "description": "Returns the authenticated team.",
+        "operationId": "me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid player cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Current player",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/admin/login": {
+      "post": {
+        "description": "Logs an admin in; sets the `spm_admin_token` cookie.",
+        "operationId": "adminLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminLoginResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Wrong admin credentials.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Admin login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/admin/logout": {
+      "post": {
+        "description": "Clears the admin cookie.",
+        "operationId": "adminLogout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Admin logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/players/me": {
+      "get": {
+        "description": "Team profile, per-game session status and whether the round is open.",
+        "operationId": "me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Player status",
+        "tags": [
+          "players"
+        ]
+      }
+    },
+    "/games/wordle/start": {
+      "post": {
+        "description": "Starts or re-opens the team's Wordle session. The answer is never returned.",
+        "operationId": "start",
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartGameBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WordleStartResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Round closed/paused, game disabled, or game already completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Start Wordle",
+        "tags": [
+          "wordle"
+        ]
+      }
+    },
+    "/games/wordle/guess": {
+      "post": {
+        "description": "Submits a 5-letter word guess and returns feedback only.",
+        "operationId": "guess",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WordleGuessBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WordleGuessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not a valid 5-letter dictionary word.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No session for this team (start first).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Session busy or game already completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Submit a guess",
+        "tags": [
+          "wordle"
+        ]
+      }
+    },
+    "/games/wordle/finish": {
+      "post": {
+        "description": "Finalizes an expired session as TIMEOUT or returns the stored result for a terminal session.",
+        "operationId": "finish",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameFinishResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Session still in progress and not expired.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Finish Wordle",
+        "tags": [
+          "wordle"
+        ]
+      }
+    },
+    "/games/shadow/start": {
+      "post": {
+        "description": "Starts or re-opens the team's Shadow session and returns the round's questions (answers hidden).",
+        "operationId": "start",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShadowStartResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Round closed/paused, game disabled, already completed, or no questions configured.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Start Shadow",
+        "tags": [
+          "shadow"
+        ]
+      }
+    },
+    "/games/shadow/answer": {
+      "post": {
+        "description": "Submits an answer for a question; the correct answer is revealed only after the question resolves.",
+        "operationId": "answer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShadowAnswerBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShadowAnswerResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown questionId or malformed body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No session for this team (start first).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Question already resolved, attempts exhausted, session busy, or game already completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Answer a question",
+        "tags": [
+          "shadow"
+        ]
+      }
+    },
+    "/games/shadow/finish": {
+      "post": {
+        "description": "Finalizes an expired session as TIMEOUT or returns the stored result for a terminal session.",
+        "operationId": "finish",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameFinishResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Session still in progress and not expired.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Finish Shadow",
+        "tags": [
+          "shadow"
+        ]
+      }
+    },
+    "/games/cards/start": {
+      "post": {
+        "description": "Starts or re-opens the team's Cards session and returns the board positions (fronts hidden).",
+        "operationId": "start",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardsStartResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Round closed/paused, game disabled, or game already completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Start Cards",
+        "tags": [
+          "cards"
+        ]
+      }
+    },
+    "/games/cards/move": {
+      "post": {
+        "description": "Flips one card; the front asset is revealed only on this flip. Two face-up cards resolve a match attempt.",
+        "operationId": "move",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CardsMoveBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardsMoveResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown cardId or malformed body.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No session for this team (start first).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Card already matched/revealed, session busy, or game already completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Flip a card",
+        "tags": [
+          "cards"
+        ]
+      }
+    },
+    "/games/cards/finish": {
+      "post": {
+        "description": "Finalizes an expired session as TIMEOUT or returns the stored result for a terminal session.",
+        "operationId": "finish",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameFinishResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Session still in progress and not expired.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "Finish Cards",
+        "tags": [
+          "cards"
+        ]
+      }
+    },
+    "/leaderboard": {
+      "get": {
+        "description": "Ranked teams with at least one terminal session. Order: totalScore desc, totalTimeMs asc, team name asc.",
+        "operationId": "top",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Top teams",
+        "tags": [
+          "leaderboard"
+        ]
+      }
+    },
+    "/leaderboard/me": {
+      "get": {
+        "description": "The authenticated team's rank and entry, or null when it has not finished any game.",
+        "operationId": "me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardMeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_access_token": []
+          }
+        ],
+        "summary": "My rank",
+        "tags": [
+          "leaderboard"
+        ]
+      }
+    },
+    "/admin/roster/import": {
+      "post": {
+        "description": "Upserts teams from a list. Codes become the lowercased player access codes.",
+        "operationId": "importRoster",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RosterImportBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RosterImportResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Case-colliding codes or access-code clashes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "Import roster",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/round": {
+      "get": {
+        "description": "Round status and configuration.",
+        "operationId": "getRound",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRoundStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "Round status",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/round/config": {
+      "post": {
+        "description": "Toggles games and sets wordleAnswer / cardsSeed. Any subset of fields.",
+        "operationId": "updateConfig",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRoundConfigBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRoundStatusResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Round is ACTIVE — config is locked.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "Update round config",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/round/start": {
+      "post": {
+        "description": "IDLE or ENDED → ACTIVE. Sets startedAt and expiresAt.",
+        "operationId": "startRound",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRoundStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "Start round",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/round/pause": {
+      "post": {
+        "description": "ACTIVE → PAUSED. Records pausedAt.",
+        "operationId": "pauseRound",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRoundStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "Pause round",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/round/resume": {
+      "post": {
+        "description": "PAUSED → ACTIVE. Shifts expiresAt so pause time is not counted.",
+        "operationId": "resumeRound",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRoundStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "Resume round",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/round/end": {
+      "post": {
+        "description": "ACTIVE or PAUSED → ENDED.",
+        "operationId": "endRound",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminRoundStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "End round",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/teams": {
+      "get": {
+        "description": "Roster with per-game session rows and totalScore.",
+        "operationId": "listTeams",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminTeamsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "List teams",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/teams/reset": {
+      "post": {
+        "description": "Marks finished sessions ABANDONED so the team can replay. In-progress sessions are untouched.",
+        "operationId": "resetTeam",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTeamResetBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamResetResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown teamId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorBodyDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "spm_admin_token": []
+          }
+        ],
+        "summary": "Reset team",
+        "tags": [
+          "admin"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Spider-Man IEEE Event Platform API",
+    "description": "REST API for the Spider-Man themed IEEE event platform.\n\nAuth uses HTTP-only cookies: `spm_access_token` (player) and `spm_admin_token` (admin). Player and admin routes are marked with the matching cookie security scheme. See `docs/frontend.md` (integration guide) and `docs/api.md` (full reference).",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Player + admin authentication"
+    },
+    {
+      "name": "players",
+      "description": "Authenticated player status"
+    },
+    {
+      "name": "wordle",
+      "description": "Wordle — guess the 5-letter word"
+    },
+    {
+      "name": "shadow",
+      "description": "Guess the Character by Shadow"
+    },
+    {
+      "name": "cards",
+      "description": "Match the Cards"
+    },
+    {
+      "name": "leaderboard",
+      "description": "Round standings"
+    },
+    {
+      "name": "admin",
+      "description": "Round control, roster and team resets (admin cookie)"
+    }
+  ],
+  "servers": [
+    {
+      "url": "/api",
+      "description": "The platform prefix — all routes live under /api."
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "spm_access_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "spm_access_token"
+      },
+      "spm_admin_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "spm_admin_token"
+      }
+    },
+    "schemas": {
+      "PlayerLoginDto": {
+        "type": "object",
+        "properties": {
+          "accessCode": {
+            "type": "string",
+            "description": "Roster access code (lowercased team code).",
+            "example": "teama"
+          },
+          "pin": {
+            "type": "string",
+            "description": "Shared event PIN.",
+            "example": "1123"
+          }
+        },
+        "required": [
+          "accessCode",
+          "pin"
+        ]
+      },
+      "TeamSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Team id (cuid).",
+            "example": "cmspz6z310001z9fcyi80n24h"
+          },
+          "code": {
+            "type": "string",
+            "description": "Roster code, lowercased — doubles as the player access code.",
+            "example": "teama"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name.",
+            "example": "Team Alpha"
+          },
+          "memberNames": {
+            "description": "Team member names.",
+            "example": [
+              "A1",
+              "A2"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "room": {
+            "type": "string",
+            "nullable": true,
+            "description": "Room label, if any.",
+            "example": "A101"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "memberNames",
+          "room"
+        ]
+      },
+      "PlayerLoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamSummaryDto"
+          }
+        },
+        "required": [
+          "team"
+        ]
+      },
+      "ApiErrorBodyDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 409
+          },
+          "error": {
+            "type": "string",
+            "example": "Conflict"
+          },
+          "message": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ],
+            "description": "Human-readable error message(s)."
+          }
+        },
+        "required": [
+          "statusCode",
+          "error",
+          "message"
+        ]
+      },
+      "OkResponseDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "ok"
+        ]
+      },
+      "MeResponseDto": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamSummaryDto"
+          }
+        },
+        "required": [
+          "team"
+        ]
+      },
+      "AdminLoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Admin username.",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "Admin password.",
+            "example": "••••••••"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "AdminLoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "example": "admin"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "SessionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "game": {
+            "type": "string",
+            "enum": [
+              "WORDLE",
+              "SHADOW",
+              "CARDS"
+            ],
+            "description": "Game kind."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "COMPLETED",
+              "TIMEOUT",
+              "ABANDONED"
+            ],
+            "description": "Session status."
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "When the session started."
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "Server-side expiry — the countdown is visual only."
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "description": "When the session was finalized."
+          },
+          "score": {
+            "type": "number",
+            "nullable": true,
+            "description": "Final score, when terminal."
+          }
+        },
+        "required": [
+          "game",
+          "status",
+          "startedAt",
+          "expiresAt",
+          "finishedAt",
+          "score"
+        ]
+      },
+      "PlayerStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamSummaryDto"
+          },
+          "sessions": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SessionSummaryDto"
+            },
+            "description": "One session summary per game."
+          },
+          "roundOpen": {
+            "type": "boolean",
+            "description": "Whether the round is currently ACTIVE."
+          }
+        },
+        "required": [
+          "team",
+          "sessions",
+          "roundOpen"
+        ]
+      },
+      "StartGameBodyDto": {
+        "type": "object",
+        "properties": {
+          "clientActionId": {
+            "type": "string",
+            "description": "Idempotency key (8-64 chars, alphanumeric + `-`).",
+            "example": "start-uuid"
+          }
+        }
+      },
+      "WordleStartResponseDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Game session id."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server-side expiry — the countdown is visual only."
+          },
+          "attemptsAllowed": {
+            "type": "number",
+            "example": 6
+          },
+          "wordLength": {
+            "type": "number",
+            "example": 5
+          }
+        },
+        "required": [
+          "sessionId",
+          "expiresAt",
+          "attemptsAllowed",
+          "wordLength"
+        ]
+      },
+      "WordleGuessBodyDto": {
+        "type": "object",
+        "properties": {
+          "guess": {
+            "type": "string",
+            "description": "Exactly 5 letters, a real dictionary word.",
+            "example": "crane"
+          },
+          "clientActionId": {
+            "type": "string",
+            "description": "Idempotency key (8-64 chars, alphanumeric + `-`).",
+            "example": "guess-uuid"
+          }
+        },
+        "required": [
+          "guess",
+          "clientActionId"
+        ]
+      },
+      "WordleFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "letter": {
+            "type": "string",
+            "example": "c"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "correct",
+              "present",
+              "absent"
+            ]
+          }
+        },
+        "required": [
+          "letter",
+          "status"
+        ]
+      },
+      "WordleGuessResponseDto": {
+        "type": "object",
+        "properties": {
+          "guessCount": {
+            "type": "number",
+            "example": 1
+          },
+          "attemptsLeft": {
+            "type": "number",
+            "example": 5
+          },
+          "feedback": {
+            "description": "Per-letter feedback.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WordleFeedbackDto"
+            }
+          },
+          "wordleStatus": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "WON",
+              "LOST",
+              "TIMEOUT"
+            ]
+          }
+        },
+        "required": [
+          "guessCount",
+          "attemptsLeft",
+          "feedback",
+          "wordleStatus"
+        ]
+      },
+      "FinishBodyDto": {
+        "type": "object",
+        "properties": {
+          "clientActionId": {
+            "type": "string",
+            "description": "Idempotency key (8-64 chars, alphanumeric + `-`).",
+            "example": "finish-uuid"
+          }
+        },
+        "required": [
+          "clientActionId"
+        ]
+      },
+      "GameFinishResponseDto": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "description": "Final score.",
+            "example": 800
+          },
+          "timeMs": {
+            "type": "number",
+            "description": "Milliseconds from session start to finalization.",
+            "example": 93211
+          }
+        },
+        "required": [
+          "score",
+          "timeMs"
+        ]
+      },
+      "ShadowQuestionPublicDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Question id."
+          },
+          "assetUrl": {
+            "type": "string",
+            "description": "CDN URL of the character shadow image."
+          },
+          "options": {
+            "description": "Answer options — includes the correct one (not identified).",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "assetUrl",
+          "options"
+        ]
+      },
+      "ShadowStartResponseDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Game session id."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server-side expiry — the countdown is visual only."
+          },
+          "questions": {
+            "description": "Round questions in order; correct answers are hidden.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShadowQuestionPublicDto"
+            }
+          },
+          "maxAttemptsPerQuestion": {
+            "type": "number",
+            "example": 3
+          }
+        },
+        "required": [
+          "sessionId",
+          "expiresAt",
+          "questions",
+          "maxAttemptsPerQuestion"
+        ]
+      },
+      "ShadowAnswerBodyDto": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string",
+            "description": "Question id from start.",
+            "example": "cmspxk2y30006z963kwd5pf5a"
+          },
+          "answer": {
+            "type": "string",
+            "description": "Chosen option; matched case-insensitively.",
+            "example": "Black Cat"
+          },
+          "clientActionId": {
+            "type": "string",
+            "description": "Idempotency key (8-64 chars, alphanumeric + `-`).",
+            "example": "answer-uuid"
+          }
+        },
+        "required": [
+          "questionId",
+          "answer",
+          "clientActionId"
+        ]
+      },
+      "ShadowAnswerResponseDto": {
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": "string"
+          },
+          "questionIndex": {
+            "type": "number",
+            "example": 0
+          },
+          "correct": {
+            "type": "boolean"
+          },
+          "correctAnswer": {
+            "type": "string",
+            "description": "Revealed only after the question resolves."
+          },
+          "attemptsUsed": {
+            "type": "number",
+            "example": 1
+          },
+          "attemptsLeft": {
+            "type": "number",
+            "example": 2
+          },
+          "questionScore": {
+            "type": "number",
+            "example": 100
+          },
+          "totalCorrect": {
+            "type": "number",
+            "example": 1
+          },
+          "questionCount": {
+            "type": "number",
+            "example": 6
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "COMPLETED",
+              "TIMEOUT"
+            ]
+          }
+        },
+        "required": [
+          "questionId",
+          "questionIndex",
+          "correct",
+          "correctAnswer",
+          "attemptsUsed",
+          "attemptsLeft",
+          "questionScore",
+          "totalCorrect",
+          "questionCount",
+          "status"
+        ]
+      },
+      "CardPublicDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Card id (uuid).",
+            "example": "a00c6eca-b097-430c-b799-b1fdcf6a22e1"
+          },
+          "index": {
+            "type": "number",
+            "description": "Position index on the 100-card board.",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "index"
+        ]
+      },
+      "CardsStartResponseDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "description": "Game session id."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server-side expiry — the countdown is visual only."
+          },
+          "cards": {
+            "description": "Board positions (ids only — fronts are hidden).",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CardPublicDto"
+            }
+          },
+          "backAssetUrl": {
+            "type": "string",
+            "description": "Shared card back asset URL."
+          }
+        },
+        "required": [
+          "sessionId",
+          "expiresAt",
+          "cards",
+          "backAssetUrl"
+        ]
+      },
+      "CardsMoveBodyDto": {
+        "type": "object",
+        "properties": {
+          "cardId": {
+            "type": "string",
+            "description": "Card id (uuid) from start.",
+            "example": "a00c6eca-b097-430c-b799-b1fdcf6a22e1"
+          },
+          "clientActionId": {
+            "type": "string",
+            "description": "Idempotency key (8-64 chars, alphanumeric + `-`).",
+            "example": "move-uuid"
+          }
+        },
+        "required": [
+          "cardId",
+          "clientActionId"
+        ]
+      },
+      "CardsStatePublicDto": {
+        "type": "object",
+        "properties": {
+          "moves": {
+            "type": "number",
+            "example": 1
+          },
+          "revealed": {
+            "description": "Face-up, unmatched card indices.",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "matched": {
+            "description": "Matched card indices.",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "matchedPairs": {
+            "type": "number",
+            "example": 0
+          },
+          "totalPairs": {
+            "type": "number",
+            "example": 50
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "COMPLETED",
+              "TIMEOUT"
+            ]
+          }
+        },
+        "required": [
+          "moves",
+          "revealed",
+          "matched",
+          "matchedPairs",
+          "totalPairs",
+          "status"
+        ]
+      },
+      "CardsMoveResponseDto": {
+        "type": "object",
+        "properties": {
+          "moveId": {
+            "type": "string",
+            "description": "The idempotency key echoed back."
+          },
+          "cardId": {
+            "type": "string"
+          },
+          "frontAssetUrl": {
+            "type": "string",
+            "description": "Front asset — revealed only on this flip."
+          },
+          "revealed": {
+            "type": "boolean",
+            "description": "First card of an attempt is now face-up."
+          },
+          "matched": {
+            "type": "boolean"
+          },
+          "matchCompleted": {
+            "type": "boolean",
+            "description": "This flip resolved a pair; both cards stay face-up."
+          },
+          "unmatchedFlipBack": {
+            "type": "boolean",
+            "description": "Attempt mismatched; both cards flip back."
+          },
+          "state": {
+            "$ref": "#/components/schemas/CardsStatePublicDto"
+          }
+        },
+        "required": [
+          "moveId",
+          "cardId",
+          "frontAssetUrl",
+          "revealed",
+          "matched",
+          "matchCompleted",
+          "unmatchedFlipBack",
+          "state"
+        ]
+      },
+      "LeaderboardEntryDto": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "number",
+            "example": 1,
+            "description": "1-based rank."
+          },
+          "teamCode": {
+            "type": "string",
+            "example": "teama"
+          },
+          "teamName": {
+            "type": "string",
+            "example": "Team Alpha"
+          },
+          "totalScore": {
+            "type": "number",
+            "example": 1000
+          },
+          "totalTimeMs": {
+            "type": "number",
+            "example": 36
+          },
+          "gamesCompleted": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "rank",
+          "teamCode",
+          "teamName",
+          "totalScore",
+          "totalTimeMs",
+          "gamesCompleted"
+        ]
+      },
+      "LeaderboardResponseDto": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeaderboardEntryDto"
+            }
+          },
+          "totalTeams": {
+            "type": "number",
+            "example": 2,
+            "description": "Total teams with a terminal session."
+          }
+        },
+        "required": [
+          "entries",
+          "totalTeams"
+        ]
+      },
+      "LeaderboardMeResponseDto": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "number",
+            "nullable": true,
+            "example": 1
+          },
+          "entry": {
+            "nullable": true,
+            "description": "Null when the team has not finished any game.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LeaderboardEntryDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "rank",
+          "entry"
+        ]
+      },
+      "RosterEntryDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Team code — becomes the lowercased player access code.",
+            "example": "TEAMA"
+          },
+          "name": {
+            "type": "string",
+            "example": "Team Alpha"
+          },
+          "memberNames": {
+            "description": "1-8 member names.",
+            "example": [
+              "A1",
+              "A2"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "room": {
+            "type": "string",
+            "nullable": true,
+            "example": "A101"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "memberNames"
+        ]
+      },
+      "RosterImportBodyDto": {
+        "type": "object",
+        "properties": {
+          "teams": {
+            "description": "1-2000 teams.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RosterEntryDto"
+            }
+          }
+        },
+        "required": [
+          "teams"
+        ]
+      },
+      "RosterImportResponseDto": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "number",
+            "example": 2
+          },
+          "updated": {
+            "type": "number",
+            "example": 0
+          },
+          "total": {
+            "type": "number",
+            "example": 2
+          }
+        },
+        "required": [
+          "created",
+          "updated",
+          "total"
+        ]
+      },
+      "AdminRoundStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "number": {
+            "type": "number",
+            "example": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "IDLE",
+              "ACTIVE",
+              "PAUSED",
+              "ENDED"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "pausedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "wordleEnabled": {
+            "type": "boolean"
+          },
+          "shadowEnabled": {
+            "type": "boolean"
+          },
+          "cardsEnabled": {
+            "type": "boolean"
+          },
+          "wordleAnswer": {
+            "type": "string",
+            "nullable": true,
+            "description": "Round wordle answer, if set."
+          },
+          "cardsSeed": {
+            "type": "number",
+            "nullable": true,
+            "description": "Cards board seed, if set."
+          }
+        },
+        "required": [
+          "number",
+          "status",
+          "startedAt",
+          "pausedAt",
+          "expiresAt",
+          "wordleEnabled",
+          "shadowEnabled",
+          "cardsEnabled",
+          "wordleAnswer",
+          "cardsSeed"
+        ]
+      },
+      "AdminRoundConfigBodyDto": {
+        "type": "object",
+        "properties": {
+          "wordleEnabled": {
+            "type": "boolean"
+          },
+          "shadowEnabled": {
+            "type": "boolean"
+          },
+          "cardsEnabled": {
+            "type": "boolean"
+          },
+          "wordleAnswer": {
+            "type": "string",
+            "nullable": true,
+            "description": "Exactly 5 letters; null clears.",
+            "example": "spide"
+          },
+          "cardsSeed": {
+            "type": "number",
+            "nullable": true,
+            "description": "Positive integer; null clears.",
+            "example": 123
+          }
+        }
+      },
+      "AdminSessionRowDto": {
+        "type": "object",
+        "properties": {
+          "game": {
+            "type": "string",
+            "enum": [
+              "WORDLE",
+              "SHADOW",
+              "CARDS"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "COMPLETED",
+              "TIMEOUT",
+              "ABANDONED"
+            ]
+          },
+          "startedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "score": {
+            "type": "number",
+            "nullable": true
+          },
+          "timeMs": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "game",
+          "status",
+          "startedAt",
+          "expiresAt",
+          "finishedAt",
+          "score",
+          "timeMs"
+        ]
+      },
+      "AdminTeamRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cmspz6z310001z9fcyi80n24h"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "memberNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "room": {
+            "type": "string",
+            "nullable": true
+          },
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminSessionRowDto"
+            }
+          },
+          "totalScore": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "memberNames",
+          "room",
+          "sessions",
+          "totalScore"
+        ]
+      },
+      "AdminTeamsResponseDto": {
+        "type": "object",
+        "properties": {
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminTeamRowDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 2
+          }
+        },
+        "required": [
+          "teams",
+          "total"
+        ]
+      },
+      "AdminTeamResetBodyDto": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string",
+            "description": "Team id (cuid).",
+            "example": "cmspz6z310001z9fcyi80n24h"
+          },
+          "game": {
+            "type": "string",
+            "enum": [
+              "WORDLE",
+              "SHADOW",
+              "CARDS"
+            ],
+            "description": "Game to reset; omit to reset all finished games for the team."
+          }
+        },
+        "required": [
+          "teamId"
+        ]
+      },
+      "TeamResetResponseDto": {
+        "type": "object",
+        "properties": {
+          "reset": {
+            "type": "number",
+            "example": 1,
+            "description": "Number of sessions reset."
+          }
+        },
+        "required": [
+          "reset"
+        ]
+      }
+    }
+  }
+}

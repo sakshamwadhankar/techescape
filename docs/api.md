@@ -4,6 +4,26 @@ NestJS API at `apps/api/src`. All routes are under the `/api` prefix and
 protected by `ThrottlerGuard` (`RATE_LIMIT_MAX` req/min per IP, default 400,
 window `RATE_LIMIT_TTL` seconds).
 
+Frontend engineers integrating the browser app: see
+[docs/frontend.md](frontend.md) for the same contract from the client's point
+of view. UI/UX designers: see [docs/design.md](design.md).
+
+## OpenAPI spec
+
+A machine-readable OpenAPI 3.0 document is generated from the controllers and
+committed at `docs/openapi.json` (26 paths, all request/response schemas,
+cookie security schemes, `servers: [{ url: "/api" }]`). Regenerate it after any
+API change:
+
+```sh
+pnpm openapi:gen          # or pnpm --filter @spiderman/api openapi:gen
+```
+
+The spec is built offline (no Postgres/Redis needed) from the Swagger
+decorators on each controller. Optionally serve interactive Swagger UI by
+setting `ENABLE_SWAGGER=true` in `.env` — it is mounted at `/api/docs`.
+**Keep `ENABLE_SWAGGER` off in production.**
+
 Authentication uses HTTP-only cookies:
 - `spm_access_token` — player (issued by `POST /api/auth/player/login`).
 - `spm_admin_token` — admin (issued by `POST /api/auth/admin/login`).

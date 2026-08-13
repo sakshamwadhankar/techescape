@@ -21,6 +21,10 @@
     "test": {
       "dependsOn": ["^build"],
       "outputs": []
+    },
+    "openapi:gen": {
+      "dependsOn": ["^build"],
+      "outputs": ["../../docs/openapi.json"]
     }
   }
 }

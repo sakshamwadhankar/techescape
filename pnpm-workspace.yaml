@@ -3,7 +3,8 @@ packages:
   - "packages/*"
 
 allowBuilds:
-  sharp: set this to true or false
+  '@scarf/scarf': false
+  sharp: true
 
 onlyBuiltDependencies:
   - "@prisma/client"
