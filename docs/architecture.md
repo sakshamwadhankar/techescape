@@ -258,6 +258,38 @@ Notes learned from the first load-test round:
   Docker Desktop VM the k6 VUs starve the API and inflate p95; validate latency
   on an idle machine or the real deployment.
 
+#### Load-test run sequence
+
+Helper scripts in `scripts/load/` (both scoped by `--prefix`, default `load`):
+
+```sh
+# 1. Remove stale sessions/actions/Redis state for load teams (idempotent, safe).
+node scripts/load/reset-sessions.mjs --prefix load
+
+# 2. Seed fresh teams load-0001..load-1000 (idempotent; skip existing codes).
+node scripts/load/seed-teams.mjs --count 1000 --prefix load
+
+# 3. Run one scenario per game (each game is one-shot per team).
+docker run --rm \
+  --add-host host.docker.internal:host-gateway \
+  -v "$PWD/scripts/load:/scripts" \
+  -e BASE_URL=http://host.docker.internal:4000/api \
+  -e GAME=cards \
+  -e ACCESS_PREFIX=load \
+  -e EVENT_PIN="<current EVENT_PIN from .env>" \
+  grafana/k6 run /scripts/spiderman.js
+
+# Repeat step 3 for GAME=wordle, GAME=shadow, GAME=leaderboard.
+# Between scenarios, either re-run step 1, or seed with a fresh prefix
+# (e.g. --prefix load2) since teams are one-shot per game.
+```
+
+`reset-sessions.mjs` deletes `GameAction` + `GameSession` rows and the Redis
+`state:<sessionId>:*`, `idem:<sessionId>:*`, and `lock:<sessionId>*` keys for
+the matching teams. `seed-teams.mjs` inserts `Team` rows with access codes
+`<prefix>-0001..-N` pinned by the current `EVENT_PIN`; remove load teams
+before the real event.
+
 ## Security
 
 - Answers are never returned before submission (wordle answer, shadow correct

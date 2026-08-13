@@ -238,6 +238,7 @@ export class SessionsService {
       },
     });
     await this.redis.del(`state:${sessionId}`, `lock:${sessionId}`);
+    await this.redis.delPattern(`idem:${sessionId}:*`);
     return session;
   }
 

@@ -32,6 +32,25 @@ export class RedisService {
   }
 
   /**
+   * Delete all keys matching a glob pattern using SCAN (non-blocking, unlike
+   * KEYS). Used to clear session-scoped keys (e.g. idempotency entries).
+   */
+  async delPattern(pattern: string): Promise<void> {
+    let cursor = "0";
+    do {
+      const [next, keys] = await this.client.scan(
+        cursor,
+        "MATCH",
+        pattern,
+        "COUNT",
+        200,
+      );
+      cursor = next;
+      if (keys.length > 0) await this.client.del(...keys);
+    } while (cursor !== "0");
+  }
+
+  /**
    * Acquire a lock, run fn, and release the lock.
    * Returns null when the lock could not be acquired.
    */
