@@ -114,7 +114,7 @@ export function ShadowGame() {
     return (
       <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4">
         <ErrorState title="Could not start Shadow" message={error} />
-        <Link href="/" className="mt-4 text-center text-sm text-red-400 hover:underline">
+        <Link href="/" className="mt-4 text-center text-sm text-accent-bright hover:underline">
           Back to home
         </Link>
       </div>
@@ -141,16 +141,17 @@ export function ShadowGame() {
       }}
       footer={
         finished ? (
-          <div className="rounded-md border border-slate-800 bg-slate-900/60 p-6 text-center">
-            <p className="text-lg font-semibold">
+          <div className="rounded-xl border border-line bg-panel/80 p-6 text-center">
+            <p className="font-display text-lg tracking-tight text-ink">
               {status === "COMPLETED"
                 ? `You identified ${state.totalCorrect}/${start.questions.length}!`
                 : "Time's up"}
             </p>
             {result ? (
-              <p className="mt-1 text-slate-400">
-                Score <span className="font-bold text-red-400">{result.score}</span> in{" "}
-                {Math.round(result.timeMs / 1000)}s
+              <p className="mt-1 text-muted">
+                Score{" "}
+                <span className="font-mono font-bold text-accent-bright">{result.score}</span>{" "}
+                in {Math.round(result.timeMs / 1000)}s
               </p>
             ) : null}
             <Link href="/" className="mt-4 inline-block">
@@ -170,11 +171,11 @@ export function ShadowGame() {
 
       {finished || !question ? null : (
         <div className="space-y-6">
-          <div className="overflow-hidden rounded-lg border border-slate-800">
+          <div className="overflow-hidden rounded-xl border border-line bg-panel">
             <img
               src={question.assetUrl}
               alt={`Shadow ${state.index + 1}`}
-              className="mx-auto max-h-72 w-full object-contain bg-slate-900"
+              className="mx-auto max-h-72 w-full object-contain"
             />
           </div>
 
@@ -185,8 +186,8 @@ export function ShadowGame() {
                 last?.correct === true || state.attemptsUsed >= start.maxAttemptsPerQuestion;
               const isCorrectAnswer = resolved && last ? option === last.correctAnswer : false;
               const locked = busy || resolved;
-              let cls = "border-slate-700 bg-slate-900 text-slate-100";
-              if (isWrong) cls = "border-red-900 bg-red-950/40 text-red-400 line-through";
+              let cls = "border-line bg-panel text-ink hover:bg-raised";
+              if (isWrong) cls = "border-accent-deep bg-accent-deep/30 text-accent-bright line-through";
               else if (isCorrectAnswer) cls = "border-green-700 bg-green-900/40 text-green-300";
               return (
                 <button
@@ -194,7 +195,7 @@ export function ShadowGame() {
                   type="button"
                   disabled={locked}
                   onClick={() => void answer(option)}
-                  className={`rounded-md border px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${cls}`}
+                  className={`rounded-lg border px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${cls}`}
                 >
                   {option}
                 </button>

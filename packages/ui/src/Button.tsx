@@ -11,12 +11,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600 disabled:bg-red-900/60",
+    "bg-accent text-white hover:bg-accent-bright focus-visible:outline-accent disabled:bg-accent/40",
   secondary:
-    "bg-slate-800 text-slate-100 hover:bg-slate-700 focus-visible:outline-slate-600 disabled:bg-slate-900/60",
-  danger: "bg-red-900 text-white hover:bg-red-800 disabled:bg-red-950/70",
-  ghost:
-    "bg-transparent text-slate-200 hover:bg-slate-800/60 disabled:text-slate-500",
+    "bg-raised text-ink hover:bg-line focus-visible:outline-line disabled:bg-raised/40",
+  danger: "bg-accent-deep text-white hover:bg-accent focus-visible:outline-accent-deep disabled:bg-accent-deep/40",
+  ghost: "bg-transparent text-ink hover:bg-raised disabled:text-faint",
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -34,9 +33,9 @@ export function Button({
   ...props
 }: ButtonProps) {
   const classes = [
-    "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-colors",
+    "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all",
     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-    "disabled:cursor-not-allowed disabled:opacity-60",
+    "active:translate-y-px disabled:cursor-not-allowed disabled:opacity-70",
     variantClasses[variant],
     sizeClasses[size],
     full ? "w-full" : "",

@@ -32,13 +32,13 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       aria-label={title}
     >
       <div
-        className="absolute inset-0 bg-black/70"
+        className="absolute inset-0 bg-black/80"
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="relative z-10 w-full max-w-md rounded-xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
+      <div className="relative z-10 w-full max-w-md rounded-xl border border-line bg-panel p-6 shadow-2xl shadow-black/50">
         {title ? (
-          <h2 className="mb-4 text-xl font-bold text-slate-100">{title}</h2>
+          <h2 className="mb-4 font-display text-xl tracking-tight text-ink">{title}</h2>
         ) : null}
         {children}
       </div>

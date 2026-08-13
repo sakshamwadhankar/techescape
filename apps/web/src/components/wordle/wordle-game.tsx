@@ -31,16 +31,16 @@ interface WordleState {
 const TERMINAL: ReadonlySet<WordleStatus> = new Set(["WON", "LOST", "TIMEOUT"]);
 
 const TILE_COLORS: Record<WordleTile["status"], string> = {
-  correct: "bg-green-700 border-green-600",
-  present: "bg-yellow-700 border-yellow-600",
-  absent: "bg-slate-800 border-slate-700",
-  empty: "border-slate-700",
+  correct: "bg-green-800 border-green-600",
+  present: "bg-yellow-800 border-yellow-600",
+  absent: "bg-panel border-line",
+  empty: "border-line",
 };
 
 const KEY_COLORS: Record<string, string> = {
   correct: "bg-green-700 text-white",
   present: "bg-yellow-700 text-white",
-  absent: "bg-slate-800 text-slate-500",
+  absent: "bg-line text-faint",
 };
 
 export function WordleGame() {
@@ -148,7 +148,7 @@ export function WordleGame() {
     return (
       <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4">
         <ErrorState title="Could not start Wordle" message={error} />
-        <Link href="/" className="mt-4 text-center text-sm text-red-400 hover:underline">
+        <Link href="/" className="mt-4 text-center text-sm text-accent-bright hover:underline">
           Back to home
         </Link>
       </div>
@@ -177,14 +177,15 @@ export function WordleGame() {
       onExpire={() => void finalize()}
       footer={
         finished ? (
-          <div className="rounded-md border border-slate-800 bg-slate-900/60 p-6 text-center">
-            <p className="text-lg font-semibold">
+          <div className="rounded-xl border border-line bg-panel/80 p-6 text-center">
+            <p className="font-display text-lg tracking-tight text-ink">
               {status === "WON" ? "You got it!" : status === "LOST" ? "Out of guesses" : "Time's up"}
             </p>
             {result ? (
-              <p className="mt-1 text-slate-400">
-                Score <span className="font-bold text-red-400">{result.score}</span> in{" "}
-                {Math.round(result.timeMs / 1000)}s
+              <p className="mt-1 text-muted">
+                Score{" "}
+                <span className="font-mono font-bold text-accent-bright">{result.score}</span>{" "}
+                in {Math.round(result.timeMs / 1000)}s
               </p>
             ) : null}
             <Link href="/" className="mt-4 inline-block">
@@ -210,9 +211,9 @@ export function WordleGame() {
             {row.map((tile, c) => (
               <div
                 key={c}
-                className={`flex h-12 w-12 items-center justify-center rounded-md border text-2xl font-extrabold uppercase ${
+                className={`flex h-12 w-12 items-center justify-center rounded-lg border text-2xl font-extrabold uppercase transition-colors ${
                   tile.status ? TILE_COLORS[tile.status] : TILE_COLORS.empty
-                } ${tile.letter ? "border-red-500/50" : ""}`}
+                } ${tile.letter ? "border-accent/60" : ""}`}
               >
                 {tile.letter}
               </div>
@@ -237,12 +238,12 @@ export function WordleGame() {
                     else if (key === "BACKSPACE") backspace();
                     else pressLetter(key);
                   }}
-                  className={`rounded px-2 py-3 text-sm font-bold ${
+                  className={`rounded-lg px-2 py-3 text-sm font-bold transition-colors ${
                     isAction
-                      ? "bg-slate-800 text-slate-200"
+                      ? "bg-raised text-ink"
                       : status
                         ? KEY_COLORS[status]
-                        : "bg-slate-900 text-slate-200"
+                        : "bg-panel text-ink hover:bg-raised"
                   } disabled:opacity-40`}
                 >
                   {key === "BACKSPACE" ? "⌫" : key}

@@ -32,12 +32,14 @@ export function Timer({ expiresAt, onExpire, className = "" }: TimerProps) {
   }, [expiresAt, onExpire]);
 
   const expired = remaining <= 0;
+  const low = !expired && remaining < 30_000;
 
   return (
     <div
       className={[
-        "inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2",
-        expired ? "text-red-400" : "text-slate-100",
+        "inline-flex items-center gap-2 rounded-lg border border-line bg-panel px-4 py-2",
+        expired ? "text-accent-bright" : "text-ink",
+        low ? "animate-pulse text-accent" : "",
         className,
       ].join(" ")}
       role="timer"

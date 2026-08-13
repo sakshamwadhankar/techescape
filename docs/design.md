@@ -60,12 +60,12 @@ The product has two audiences:
 
 ### Match the Cards
 
-- Memory match: **50 pairs on a 100-card board** (5 motifs × 10 colorways,
-  all spider-hero/villain themed).
+- Memory match: **12 pairs on a 24-card board** (3 motifs × 4 colorways,
+  all spider-hero themed).
 - Flip two cards per attempt; matching pairs stay face-up, mismatches flip
   back. The server decides and tells the UI what happened.
-- Score = `100 × pairs matched − 10 × extra moves`, floor 0. A perfect 100-move
-  game scores 5000; mid-round timeout keeps the score earned so far.
+- Score = `100 × pairs matched − 10 × extra moves`, floor 0. A perfect 24-move
+  game scores 1200; mid-round timeout keeps the score earned so far.
 
 ## Rules and constraints that shape the UX
 
@@ -88,20 +88,26 @@ These are non-negotiable platform rules — designs must respect them.
 
 ## Current visual language
 
-The app uses a **dark, comic-inspired** look with Tailwind CSS:
+The app uses a **dark comic-book night scene** with Tailwind CSS, defined in the
+design system at `docs/ui/DESIGN.md` (the source of truth for tokens and
+components). Summary:
 
-- Background `slate-950` (near-black), text `slate-100`; muted secondary text
-  `slate-400`/`slate-500`.
-- **Red accents** for primary actions and brand moments (e.g. `red-400`,
-  `red-500`, `red-950` panel tints) — Spider-Man energy.
-- Dark panels with subtle borders (`slate-800`/`slate-900` surfaces).
-- Monospace, tabular figures for the countdown timer.
-- Cards/boards responsive from mobile to large screens — the 100-card board
-  needs a wider layout.
+- Canvas `#0B0F1C` (near-black with a navy cast, never pure black) with a faint
+  web-lattice texture and a soft red glow at the top of the page.
+- **Spidey Red** `#E63A2E` is the single accent — primary CTAs, focus rings,
+  live-round banners, highlights. Dark panels use a cool navy surface
+  (`#121A2E`) with web-line borders (`#27324E`).
+- **Display type:** Archivo Black for headings (comic impact, tight tracking);
+  **body:** Outfit; **mono:** JetBrains Mono for the countdown, scores and team
+  codes (tabular figures). Loaded via `next/font` with system fallbacks.
+- Brand mark is an inline SVG spider logo — no emojis anywhere.
+- Cards/boards responsive from mobile to large screens — the cards board
+  uses a wider layout (`max-w-5xl`).
 
 Shared components live in `packages/ui` and are used across screens:
 `Button`, `Card`, `Timer`, `GameShell` (page shell with title + timer),
-`Dialog`/`Modal`, `LoadingState`, `ErrorState`, `Leaderboard`.
+`Dialog`/`Modal`, `LoadingState` (spider-web spinner), `ErrorState`,
+`Leaderboard`.
 
 Current player routes: `/`, `/login`, `/play/wordle`, `/play/shadow`,
 `/play/cards`, `/leaderboard`. Admin: `/admin/login`, `/admin`.

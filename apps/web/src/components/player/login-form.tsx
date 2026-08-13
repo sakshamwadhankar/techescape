@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, ErrorState } from "@spiderman/ui";
 import { api, ApiError } from "@/lib/api";
+import { SpiderLogo } from "@/components/spider-logo";
 
 export function LoginForm() {
   const router = useRouter();
@@ -29,16 +30,23 @@ export function LoginForm() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4">
       <div className="mb-8 text-center">
-        <div className="text-4xl">🕷️</div>
-        <h1 className="mt-2 text-3xl font-extrabold text-red-500">Spider-Man Challenge</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-line bg-panel text-accent shadow-xl shadow-black/40">
+          <SpiderLogo className="h-9 w-9" />
+        </div>
+        <h1 className="mt-4 font-display text-4xl tracking-tight text-ink">
+          Spider-Man Challenge
+        </h1>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          Tech Escape · Round 1
+        </p>
+        <p className="mt-3 text-sm text-muted">
           Enter your team code and the event PIN to begin.
         </p>
       </div>
-      <Card title="Team login">
+      <Card title="Team login" lead>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="accessCode" className="mb-1 block text-sm text-slate-400">
+            <label htmlFor="accessCode" className="field-label">
               Access code
             </label>
             <input
@@ -48,13 +56,13 @@ export function LoginForm() {
               autoCapitalize="characters"
               autoCorrect="off"
               spellCheck={false}
-              className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-red-500"
+              className="field-input font-mono"
               placeholder="e.g. TEAMA"
               required
             />
           </div>
           <div>
-            <label htmlFor="pin" className="mb-1 block text-sm text-slate-400">
+            <label htmlFor="pin" className="field-label">
               Event PIN
             </label>
             <input
@@ -62,7 +70,7 @@ export function LoginForm() {
               type="password"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
-              className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-red-500"
+              className="field-input font-mono"
               placeholder="••••"
               required
             />

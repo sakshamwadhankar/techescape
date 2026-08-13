@@ -22,7 +22,7 @@ export function Dialog({
 }: DialogProps) {
   return (
     <Modal open={open} onClose={onCancel} title={title}>
-      <p className="mb-6 text-slate-300">{message}</p>
+      <p className="mb-6 text-muted">{message}</p>
       <div className="flex justify-end gap-3">
         <Button variant="ghost" onClick={onCancel}>
           {cancelLabel}

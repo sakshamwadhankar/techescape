@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, ErrorState } from "@spiderman/ui";
 import { api, ApiError } from "@/lib/api";
+import { SpiderLogo } from "@/components/spider-logo";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -29,14 +30,19 @@ export function AdminLoginForm() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4">
       <div className="mb-8 text-center">
-        <div className="text-4xl">🕷️</div>
-        <h1 className="mt-2 text-3xl font-extrabold text-red-500">Admin</h1>
-        <p className="mt-1 text-sm text-slate-400">Organizer controls.</p>
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-line bg-panel text-accent shadow-xl shadow-black/40">
+          <SpiderLogo className="h-9 w-9" />
+        </div>
+        <h1 className="mt-4 font-display text-4xl tracking-tight text-ink">Admin</h1>
+        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.25em] text-accent">
+          Control room
+        </p>
+        <p className="mt-3 text-sm text-muted">Organizer controls.</p>
       </div>
-      <Card title="Sign in">
+      <Card title="Sign in" lead>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="mb-1 block text-sm text-slate-400">
+            <label htmlFor="username" className="field-label">
               Username
             </label>
             <input
@@ -44,12 +50,12 @@ export function AdminLoginForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
-              className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-red-500"
+              className="field-input"
               required
             />
           </div>
           <div>
-            <label htmlFor="password" className="mb-1 block text-sm text-slate-400">
+            <label htmlFor="password" className="field-label">
               Password
             </label>
             <input
@@ -58,7 +64,7 @@ export function AdminLoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
-              className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-red-500"
+              className="field-input"
               required
             />
           </div>

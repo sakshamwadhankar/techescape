@@ -1634,7 +1634,7 @@
           },
           "index": {
             "type": "number",
-            "description": "Position index on the 100-card board.",
+            "description": "Position index on the 24-card board.",
             "example": 0
           }
         },
@@ -1720,7 +1720,7 @@
           },
           "totalPairs": {
             "type": "number",
-            "example": 50
+            "example": 12
           },
           "status": {
             "type": "string",

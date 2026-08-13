@@ -21,10 +21,10 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col px-4 py-6">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-100">Admin dashboard</h1>
-          <p className="mt-1 text-sm text-slate-400">Spider-Man Challenge control room.</p>
+          <h1 className="font-display text-3xl tracking-tight text-ink">Admin dashboard</h1>
+          <p className="mt-1 text-sm text-muted">Spider-Man Challenge control room.</p>
         </div>
         <Button
           variant="ghost"

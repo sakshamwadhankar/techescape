@@ -110,7 +110,7 @@ export function CardsGame() {
     return (
       <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4">
         <ErrorState title="Could not start Cards" message={error} />
-        <Link href="/" className="mt-4 text-center text-sm text-red-400 hover:underline">
+        <Link href="/" className="mt-4 text-center text-sm text-accent-bright hover:underline">
           Back to home
         </Link>
       </div>
@@ -138,14 +138,15 @@ export function CardsGame() {
       }}
       footer={
         finished ? (
-          <div className="rounded-md border border-slate-800 bg-slate-900/60 p-6 text-center">
-            <p className="text-lg font-semibold">
+          <div className="rounded-xl border border-line bg-panel/80 p-6 text-center">
+            <p className="font-display text-lg tracking-tight text-ink">
               {board?.status === "COMPLETED" ? "All pairs matched!" : "Time's up"}
             </p>
             {result ? (
-              <p className="mt-1 text-slate-400">
-                Score <span className="font-bold text-red-400">{result.score}</span> in{" "}
-                {Math.round(result.timeMs / 1000)}s
+              <p className="mt-1 text-muted">
+                Score{" "}
+                <span className="font-mono font-bold text-accent-bright">{result.score}</span>{" "}
+                in {Math.round(result.timeMs / 1000)}s
               </p>
             ) : null}
             <Link href="/" className="mt-4 inline-block">
@@ -156,13 +157,8 @@ export function CardsGame() {
       }
     >
       {error && !finished ? <div className="mb-3"><ErrorState title="Something went wrong" message={error} /></div> : null}
-      {last?.matchCompleted ? (
-        <p className="mb-3 text-center text-sm font-semibold text-green-400">Pair matched!</p>
-      ) : last?.unmatchedFlipBack ? (
-        <p className="mb-3 text-center text-sm font-semibold text-amber-400">Not a pair — try again</p>
-      ) : null}
 
-      <div className="grid grid-cols-6 gap-2 sm:grid-cols-8 lg:grid-cols-10">
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
         {tiles.map((tile) => {
           const front = fronts[tile.card.id];
           return (
@@ -171,12 +167,12 @@ export function CardsGame() {
               type="button"
               disabled={busy || finished || tile.faceUp}
               onClick={() => void flip(tile.card)}
-              className={`relative aspect-[3/4] overflow-hidden rounded-md border transition ${
+              className={`relative aspect-square overflow-hidden rounded-lg border transition ${
                 tile.faceUp
                   ? tile.matched
                     ? "border-green-700"
-                    : "border-red-500"
-                  : "border-slate-700 hover:border-red-500"
+                    : "border-accent"
+                  : "border-line hover:border-accent"
               } disabled:opacity-90`}
             >
               {tile.faceUp && front ? (
@@ -191,6 +187,14 @@ export function CardsGame() {
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-3 flex min-h-6 items-center justify-center text-sm font-semibold">
+        {last?.matchCompleted ? (
+          <p className="text-green-400">Pair matched!</p>
+        ) : last?.unmatchedFlipBack ? (
+          <p className="text-amber-400">Not a pair — try again</p>
+        ) : null}
       </div>
     </GameShell>
   );

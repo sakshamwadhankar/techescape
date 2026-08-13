@@ -10,7 +10,7 @@ export class CardPublicDto implements CardPublic {
   @ApiProperty({ description: "Card id (uuid).", example: "a00c6eca-b097-430c-b799-b1fdcf6a22e1" })
   id: string;
 
-  @ApiProperty({ description: "Position index on the 100-card board.", example: 0 })
+  @ApiProperty({ description: "Position index on the 24-card board.", example: 0 })
   index: number;
 }
 
@@ -61,7 +61,7 @@ export class CardsStatePublicDto implements CardsStatePublic {
   @ApiProperty({ example: 0 })
   matchedPairs: number;
 
-  @ApiProperty({ example: 50 })
+  @ApiProperty({ example: 12 })
   totalPairs: number;
 
   @ApiProperty({ enum: ["IN_PROGRESS", "COMPLETED", "TIMEOUT"] })

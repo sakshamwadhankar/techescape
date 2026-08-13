@@ -11,16 +11,16 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div
-      className="flex flex-col items-center justify-center gap-3 rounded-xl border border-red-900/60 bg-red-950/40 px-6 py-10 text-center"
+      className="flex flex-col items-center justify-center gap-3 rounded-xl border border-accent-deep bg-accent-deep/30 px-6 py-10 text-center"
       role="alert"
     >
-      <p className="text-lg font-bold text-red-300">{title}</p>
-      <p className="max-w-md text-sm text-red-200/80">{message}</p>
+      <p className="font-display text-lg tracking-tight text-accent-bright">{title}</p>
+      <p className="max-w-md text-sm text-muted">{message}</p>
       {onRetry ? (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500"
+          className="mt-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-bright"
         >
           Try again
         </button>
