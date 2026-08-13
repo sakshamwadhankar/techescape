@@ -6,6 +6,8 @@ export interface GameShellProps {
   subtitle?: string;
   expiresAt?: string | null;
   onExpire?: () => void;
+  /** Wider layout for game boards that need more columns (e.g. 100 cards). */
+  wide?: boolean;
   children: ReactNode;
   footer?: ReactNode;
 }
@@ -15,11 +17,16 @@ export function GameShell({
   subtitle,
   expiresAt,
   onExpire,
+  wide = false,
   children,
   footer,
 }: GameShellProps) {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-4 py-6">
+    <div
+      className={`mx-auto flex min-h-dvh w-full flex-col px-4 py-6 ${
+        wide ? "max-w-5xl" : "max-w-3xl"
+      }`}
+    >
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-100">{title}</h1>

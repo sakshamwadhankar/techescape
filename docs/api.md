@@ -207,7 +207,7 @@ Starts (or re-opens) the Cards session for the team. Idempotent per
 `(teamId, game)`: while a session is `ACTIVE` the same one is returned; a
 completed game cannot be restarted.
 
-Returns the round's 12 card positions (ids only — fronts are hidden) plus the
+Returns the round's 100 card positions (ids only — fronts are hidden) plus the
 shared back asset. The layout is the same for every team (seeded shuffle, deck
 cached in Redis after the first load).
 

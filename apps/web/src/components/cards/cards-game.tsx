@@ -127,7 +127,8 @@ export function CardsGame() {
   return (
     <GameShell
       title="Match the Cards"
-      subtitle={`Moves: ${board?.moves ?? 0} · Pairs: ${board?.matchedPairs ?? 0}/${board?.totalPairs ?? 6}`}
+      subtitle={`Moves: ${board?.moves ?? 0} · Pairs: ${board?.matchedPairs ?? 0}/${board?.totalPairs ?? start.cards.length / 2}`}
+      wide
       expiresAt={start.expiresAt}
       onExpire={async () => {
         if (!result) {
@@ -161,7 +162,7 @@ export function CardsGame() {
         <p className="mb-3 text-center text-sm font-semibold text-amber-400">Not a pair — try again</p>
       ) : null}
 
-      <div className="grid grid-cols-4 gap-3 sm:grid-cols-6">
+      <div className="grid grid-cols-6 gap-2 sm:grid-cols-8 lg:grid-cols-10">
         {tiles.map((tile) => {
           const front = fronts[tile.card.id];
           return (

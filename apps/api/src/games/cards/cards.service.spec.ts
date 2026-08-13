@@ -6,6 +6,7 @@ import type { RoundService } from "../../sessions/round.service";
 import type { SessionsService } from "../../sessions/sessions.service";
 import { buildDeck, type CardsState } from "./cards.domain";
 import { CardsService } from "./cards.service";
+import { CARDS_DECK_SLUGS } from "../../common/constants";
 
 const NOW = 1_700_000_000_000;
 const BASE = "http://localhost:3000";
@@ -124,7 +125,7 @@ describe("CardsService", () => {
       const res = await service.start("team-1");
 
       expect(res.sessionId).toBe("sess-1");
-      expect(res.cards).toHaveLength(12);
+      expect(res.cards).toHaveLength(CARDS_DECK_SLUGS.length * 2);
       expect(res.cards[0]).toEqual({ id: expect.any(String), index: 0 });
       expect(res.backAssetUrl).toContain("/assets/cards/back.svg");
       expect(redis.setJson).toHaveBeenCalledWith(
@@ -133,7 +134,7 @@ describe("CardsService", () => {
         expect.any(Number),
       );
       const state = sessions.createSession.mock.calls[0][2] as CardsState;
-      expect(state.deck).toHaveLength(12);
+      expect(state.deck).toHaveLength(CARDS_DECK_SLUGS.length * 2);
       expect(state.matchedPairs).toBe(0);
     });
 

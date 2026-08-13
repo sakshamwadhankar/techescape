@@ -134,7 +134,8 @@ Directory: `apps/api/src/games/cards/`
 
 ### Rules
 
-- Memory match: 6 pairs (the six Spider-Man characters) on a 12-card board.
+- Memory match: 50 pairs on a 100-card board. Each pair is one distinct front
+  asset (5 motifs × 10 colors); the deck is generated from `CARDS_DECK_SLUGS`.
 - A move is a single flip (`POST /move` with a `cardId`). Two face-up cards
   resolve an attempt: matching `pairId`s keep the pair face-up (`matched`),
   otherwise both flip back (`unmatchedFlipBack`).
@@ -155,7 +156,7 @@ Directory: `apps/api/src/games/cards/`
 score = max(0, 100 × matchedPairs − 10 × max(0, moves − 2 × matchedPairs))
 ```
 
-A perfect game is 12 moves → 600. Each extra move costs 10 points (per pair
+A perfect game is 100 moves → 5000. Each extra move costs 10 points (per pair
 found); the score floors at 0. Mid-game (timeout) the formula credits the pairs
 matched so far.
 
