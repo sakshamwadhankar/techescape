@@ -2,9 +2,10 @@ packages:
   - "apps/*"
   - "packages/*"
 
-onlyBuiltDependencies:
-  - sharp
-  - esbuild
-  - prisma
-  - "@prisma/client"
-  - "@prisma/engines"
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  "@scarf/scarf": false
+  esbuild: true
+  prisma: true
+  sharp: true
