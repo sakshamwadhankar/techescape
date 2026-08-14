@@ -50,7 +50,7 @@ export function RosterImport({ onImported }: { onImported: () => void }) {
 
   return (
     <Card title="Import roster">
-      <p className="mb-3 text-sm text-slate-400">
+      <p className="mb-3 text-sm text-muted">
         Paste a JSON array of teams. Existing codes are updated.
       </p>
       <textarea
@@ -58,7 +58,7 @@ export function RosterImport({ onImported }: { onImported: () => void }) {
         onChange={(e) => setText(e.target.value)}
         spellCheck={false}
         rows={5}
-        className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 font-mono text-xs text-slate-100 outline-none focus:border-red-500"
+        className="w-full rounded-lg border border-line bg-canvas px-3 py-2 font-mono text-xs text-ink outline-none transition-colors placeholder:text-faint focus:border-accent focus:ring-1 focus:ring-accent"
         placeholder={PLACEHOLDER}
       />
       <div className="mt-3 flex items-center gap-3">

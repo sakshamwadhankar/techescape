@@ -62,7 +62,7 @@ export function TeamsPanel() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-500">
+              <tr className="border-b border-line text-faint">
                 <th className="py-2 pr-3 font-medium">Team</th>
                 <th className="py-2 pr-3 font-medium">Members</th>
                 <th className="py-2 pr-3 font-medium">Score</th>
@@ -72,25 +72,25 @@ export function TeamsPanel() {
             </thead>
             <tbody>
               {data.teams.map((team) => (
-                <tr key={team.id} className="border-b border-slate-800/60">
+                <tr key={team.id} className="border-b border-line/60">
                   <td className="py-2 pr-3">
-                    <p className="font-semibold text-slate-100">{team.name}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="font-semibold text-ink">{team.name}</p>
+                    <p className="text-xs text-faint">
                       {team.code}
                       {team.room ? ` · ${team.room}` : ""}
                     </p>
                   </td>
-                  <td className="py-2 pr-3 text-slate-400">
+                  <td className="py-2 pr-3 text-muted">
                     {team.memberNames.join(", ") || "—"}
                   </td>
-                  <td className="py-2 pr-3 font-bold text-red-400">{team.totalScore}</td>
+                  <td className="py-2 pr-3 font-mono font-bold text-accent-bright">{team.totalScore}</td>
                   <td className="py-2 pr-3">
                     {team.sessions.length === 0 ? (
-                      <span className="text-slate-600">—</span>
+                      <span className="text-faint">—</span>
                     ) : (
                       <div className="space-y-0.5">
                         {team.sessions.map((session) => (
-                          <p key={session.game} className="text-xs text-slate-400">
+                          <p key={session.game} className="text-xs text-muted">
                             {GAME_LABELS[session.game]}:{" "}
                             <span
                               className={
@@ -98,7 +98,7 @@ export function TeamsPanel() {
                                   ? "text-green-400"
                                   : session.status === "ACTIVE"
                                     ? "text-amber-400"
-                                    : "text-slate-500"
+                                    : "text-faint"
                               }
                             >
                               {session.status}

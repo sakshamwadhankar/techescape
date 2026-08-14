@@ -184,8 +184,8 @@ scoring live in `docs/games.md`. Common traits:
 - **Shadow** — 6 questions, 3 attempts each. 1st/2nd/3rd attempt correct =
   100/70/40; failed = 0. Correct answers live only in server state and are
   revealed after each question resolves.
-- **Cards** — 50 pairs on a 100-card board. `100 × matchedPairs − 10 ×
-  (moves − 2 × matchedPairs)`, floor 0 (perfect = 600). The board is a seeded
+- **Cards** — 12 pairs on a 24-card board. `100 × matchedPairs − 10 ×
+  (moves − 2 × matchedPairs)`, floor 0 (perfect = 1200). The board is a seeded
   shuffle (`cards.domain.mulberry32`) shared by every team; front assets are
   revealed only after a flip.
 

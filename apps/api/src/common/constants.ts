@@ -13,9 +13,9 @@ export const WORDLE_MAX_ATTEMPTS = 6;
 export const WORDLE_WORD_LENGTH = 5;
 export const SHADOW_MAX_ATTEMPTS_PER_QUESTION = 3;
 
-// 100 cards = 50 pairs. Each pair is one front asset (5 motifs x 10 colors).
-const CARDS_MOTIFS = ["spider", "web", "shield", "bolt", "star"] as const;
-const CARDS_COLORS_PER_MOTIF = 10;
+// 24 cards = 12 pairs. Each pair is one front asset (3 motifs x 4 colors).
+const CARDS_MOTIFS = ["spider", "web", "shield"] as const;
+const CARDS_COLORS_PER_MOTIF = 4;
 export const CARDS_DECK_SLUGS: readonly string[] = CARDS_MOTIFS.flatMap((motif) =>
   Array.from({ length: CARDS_COLORS_PER_MOTIF }, (_, i) => `${motif}-${i + 1}`),
 );

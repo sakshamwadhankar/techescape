@@ -68,19 +68,19 @@ export function RoundPanel({ round, onRoundChange }: RoundPanelProps) {
   };
 
   const statusStyles: Record<RoundStatus, string> = {
-    IDLE: "bg-slate-800 text-slate-300",
-    ACTIVE: "bg-green-900/60 text-green-300",
-    PAUSED: "bg-amber-900/60 text-amber-300",
-    ENDED: "bg-red-900/60 text-red-300",
+    IDLE: "border border-line bg-raised/60 text-muted",
+    ACTIVE: "border border-green-800/60 bg-green-900/40 text-green-300",
+    PAUSED: "border border-amber-800/60 bg-amber-900/30 text-amber-300",
+    ENDED: "border border-accent-deep bg-accent-deep/40 text-accent-bright",
   };
 
   return (
     <Card title="Round">
       <div className="flex flex-wrap items-center gap-3">
-        <span className={`rounded-md px-3 py-1 text-sm font-bold ${statusStyles[round.status]}`}>
+        <span className={`rounded-lg px-3 py-1 text-sm font-bold ${statusStyles[round.status]}`}>
           Round {round.number} · {round.status}
         </span>
-        <span className="text-sm text-slate-400">
+        <span className="text-sm text-muted">
           Started {formatTime(round.startedAt)}
           {round.status === "ACTIVE" && round.expiresAt ? ` · ends ${formatTime(round.expiresAt)}` : ""}
         </span>
@@ -120,39 +120,39 @@ export function RoundPanel({ round, onRoundChange }: RoundPanelProps) {
         </Button>
       </div>
 
-      <div className="mt-6 space-y-4 border-t border-slate-800 pt-4">
+      <div className="mt-6 space-y-4 border-t border-line pt-4">
         <div className="flex flex-wrap gap-4">
-          <label className="flex items-center gap-2 text-sm text-slate-300">
+          <label className="flex items-center gap-2 text-sm text-ink">
             <input
               type="checkbox"
               checked={config.wordleEnabled}
               onChange={(e) => setConfig((c) => ({ ...c, wordleEnabled: e.target.checked }))}
-              className="accent-red-600"
+              className="accent-accent"
             />
             Wordle
           </label>
-          <label className="flex items-center gap-2 text-sm text-slate-300">
+          <label className="flex items-center gap-2 text-sm text-ink">
             <input
               type="checkbox"
               checked={config.shadowEnabled}
               onChange={(e) => setConfig((c) => ({ ...c, shadowEnabled: e.target.checked }))}
-              className="accent-red-600"
+              className="accent-accent"
             />
             Shadow
           </label>
-          <label className="flex items-center gap-2 text-sm text-slate-300">
+          <label className="flex items-center gap-2 text-sm text-ink">
             <input
               type="checkbox"
               checked={config.cardsEnabled}
               onChange={(e) => setConfig((c) => ({ ...c, cardsEnabled: e.target.checked }))}
-              className="accent-red-600"
+              className="accent-accent"
             />
             Cards
           </label>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="wordleAnswer" className="mb-1 block text-sm text-slate-400">
+            <label htmlFor="wordleAnswer" className="field-label">
               Wordle answer (5 letters)
             </label>
             <input
@@ -160,12 +160,12 @@ export function RoundPanel({ round, onRoundChange }: RoundPanelProps) {
               value={config.wordleAnswer}
               onChange={(e) => setConfig((c) => ({ ...c, wordleAnswer: e.target.value }))}
               maxLength={5}
-              className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-red-500"
+              className="field-input font-mono uppercase"
               placeholder="spide"
             />
           </div>
           <div>
-            <label htmlFor="cardsSeed" className="mb-1 block text-sm text-slate-400">
+            <label htmlFor="cardsSeed" className="field-label">
               Cards shuffle seed
             </label>
             <input
@@ -173,7 +173,7 @@ export function RoundPanel({ round, onRoundChange }: RoundPanelProps) {
               type="number"
               value={config.cardsSeed}
               onChange={(e) => setConfig((c) => ({ ...c, cardsSeed: e.target.value }))}
-              className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-red-500"
+              className="field-input font-mono"
               placeholder="optional"
             />
           </div>
@@ -182,7 +182,7 @@ export function RoundPanel({ round, onRoundChange }: RoundPanelProps) {
           <Button size="sm" disabled={busy} onClick={() => void saveConfig()}>
             Save config
           </Button>
-          <span className="text-xs text-slate-500">Takes effect next round.</span>
+          <span className="text-xs text-faint">Takes effect next round.</span>
         </div>
       </div>
 

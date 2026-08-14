@@ -49,10 +49,10 @@ export function LeaderboardView() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-4 py-6">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-100">Leaderboard</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="font-display text-3xl tracking-tight text-ink">Leaderboard</h1>
+          <p className="mt-1 text-sm text-muted">
             {data ? `${data.totalTeams} teams entered` : "Standings by total score"}
           </p>
         </div>
@@ -76,9 +76,9 @@ export function LeaderboardView() {
         <>
           <Leaderboard entries={data.entries} highlightTeamCode={highlightTeamCode} />
           {me?.entry && me.rank !== null ? (
-            <p className="mt-4 text-center text-sm text-slate-400">
+            <p className="mt-4 text-center text-sm text-muted">
               You are currently{" "}
-              <span className="font-bold text-red-400">
+              <span className="font-mono font-bold text-accent-bright">
                 #{me.rank}
               </span>{" "}
               of {data.totalTeams} teams.
