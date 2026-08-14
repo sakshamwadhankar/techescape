@@ -117,6 +117,51 @@ docker run -d --name api -p 4000:4000 \
 docker run -d --name web -p 3000:3000 spiderman-web
 ```
 
+### Railway (Railpack)
+
+Deploying to Railway uses the same image content via Railpack instead of the
+Dockerfiles above. The repo ships two Railpack configs:
+
+- `railpack.json` — API service. Builds the full workspace graph first
+  (`pnpm turbo build --filter=@spiderman/api`, which compiles
+  `@spiderman/types`, `@spiderman/validation`, `@spiderman/db` before the API)
+  and starts with `prisma migrate deploy` + `node apps/api/dist/main.js`.
+- `railpack.web.json` — web service. Point the web service at it by setting
+  `RAILPACK_CONFIG_FILE=railpack.web.json` in the service, otherwise the
+  default `railpack.json` (API) is used. Its start command is
+  `node apps/web/.next/standalone/apps/web/server.js` (Next keeps the
+  standalone output in the workspace tree; the Dockerfile instead copies the
+  standalone root to `/app`, which is why the path differs from `server.js`).
+
+Why these configs exist: Railpack's default build for a workspace package runs
+only that package's `build` script (e.g. `pnpm --filter @spiderman/api build`),
+so the shared packages are never compiled and `nest build` fails to resolve
+`@spiderman/*`. The configs swap the build step for turbo, which builds the
+dependency graph topologically.
+
+Per-service settings on Railway:
+
+| Service | Setting | Value |
+| --- | --- | --- |
+| api | `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET` (≥16 chars), `EVENT_PIN` (≥4 chars) | required service variables |
+| api | `API_PORT` | Railway exposes port 3000 by default, so set `API_PORT=3000` (the app ignores `PORT`) |
+| api | `TRUST_PROXY` | `true` |
+| api | `CORS_ORIGINS`, `WEB_ORIGIN`, `ASSET_CDN_URL` | public web origin / CDN base |
+| api | Start command / Build command fields | leave empty — Railpack picks them up from `railpack.json` |
+| web | `NEXT_PUBLIC_API_URL` | public API base (inlined at build time) |
+| web | `RAILPACK_CONFIG_FILE` | `railpack.web.json` |
+
+Notes:
+
+- Migrations run on every API start (`prisma migrate deploy`); it is safe to
+  re-run because it only applies pending migrations.
+- Dev dependencies (including the `prisma` CLI) are kept in the runtime image
+  by default; do **not** set `RAILPACK_PRUNE_DEPS=true` on the API service or
+  the migration step will fail.
+- If a custom Start/Build command is set in the Railway service UI (or via
+  `RAILPACK_BUILD_CMD`/`RAILPACK_START_CMD`), it wins over `railpack.json` —
+  remove them so the configs take effect.
+
 ## 4. Reverse proxy (TLS)
 
 Terminate TLS in front of both apps, forward `/api/*` to the API and everything

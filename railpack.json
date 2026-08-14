@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "steps": {
+    "build": {
+      "commands": ["pnpm turbo build --filter=@spiderman/api"]
+    }
+  },
+  "deploy": {
+    "startCommand": "packages/db/node_modules/.bin/prisma migrate deploy --schema packages/db/prisma/schema.prisma && node apps/api/dist/main.js"
+  }
+}
