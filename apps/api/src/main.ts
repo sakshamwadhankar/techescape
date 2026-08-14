@@ -4,11 +4,14 @@ import { ConfigService } from "@nestjs/config";
 import { SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
+import { loadSecrets } from "./config/load-secrets";
 import {
   buildSwaggerConfig,
   SWAGGER_DOC_PATH,
   swaggerDocumentOptions,
 } from "./swagger.config";
+
+loadSecrets();
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);

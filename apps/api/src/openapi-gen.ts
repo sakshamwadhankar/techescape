@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+import { loadSecrets } from "./config/load-secrets";
 import { buildSwaggerConfig, swaggerDocumentOptions } from "./swagger.config";
 
 function findMonorepoRoot(start: string): string {
@@ -16,6 +17,7 @@ function findMonorepoRoot(start: string): string {
 }
 
 async function generate(): Promise<void> {
+  loadSecrets();
   // `preview: true` skips lifecycle hooks so generating the spec does not need
   // a running Postgres/Redis.
   const app = await NestFactory.create(AppModule, { preview: true, logger: ["error"] });

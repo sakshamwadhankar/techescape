@@ -76,6 +76,13 @@ Read this before starting work — it records what is done and what remains.
 * `scripts/load/reset-sessions.mjs` — deletes `GameAction` + `GameSession`
   rows and Redis `state:`/`idem:`/`lock:` keys for a prefix
   (`--dry-run` supported). Scoped — real teams are never touched. Tested.
+* `scripts/encrypt-secrets.mjs` — reads the repo-root `.env` and writes
+  `apps/api/secrets.json` (AES-256-GCM, `--print` to sanity-check). The API
+  decrypts it at boot (`apps/api/src/config/load-secrets.ts`) to fill env vars
+  not provided by the host, so the Docker image boots on Railway with zero
+  service variables. Key is hardcoded in both files (obfuscation, not real
+  secret storage — keep them in sync). `secrets.json` must stay committed
+  (image builds come from git).
 * `docs/deployment.md` — single-host deployment (Caddy TLS → API 4000 + web
   3000), production env checklist, event-day runbook, scaling-out notes.
 * Both helper scripts resolve `@spiderman/db`/`ioredis` via `createRequire`
