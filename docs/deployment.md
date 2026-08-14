@@ -49,6 +49,7 @@ changes from the template:
 | `JWT_SECRET` | Long random string (e.g. `openssl rand -hex 64`) — rotate per event |
 | `ADMIN_PASSWORD_HASH` | bcrypt hash of the admin password; leave `ADMIN_PASSWORD` empty |
 | `COOKIE_SECURE` | `true` (cookies only over HTTPS) |
+| `COOKIE_SAMESITE` | `lax` for same-origin; `none` when web and API are on different sites (e.g. Vercel + Railway) — requires `COOKIE_SECURE=true` |
 | `WEB_ORIGIN` | Public origin of the web app, e.g. `https://spidey.example.com` |
 | `CORS_ORIGINS` | Same as `WEB_ORIGIN` |
 | `TRUST_PROXY` | `true` when the API is behind the reverse proxy/CDN |
@@ -147,6 +148,7 @@ Per-service settings on Railway:
 | api | `API_PORT` | Railway exposes port 3000 by default, so set `API_PORT=3000` (the app ignores `PORT`) |
 | api | `TRUST_PROXY` | `true` |
 | api | `CORS_ORIGINS`, `WEB_ORIGIN`, `ASSET_CDN_URL` | public web origin / CDN base |
+| api | `RAILPACK_CONFIG_FILE` | do **not** set it on the API service — it would build/run the web app instead of the API (`railpack.json` is the API default) |
 | api | Start command / Build command fields | leave empty — Railpack picks them up from `railpack.json` |
 | web | `NEXT_PUBLIC_API_URL` | public API base (inlined at build time) |
 | web | `RAILPACK_CONFIG_FILE` | `railpack.web.json` |

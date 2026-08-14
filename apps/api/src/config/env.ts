@@ -26,6 +26,7 @@ const envSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+  COOKIE_SAMESITE: z.enum(["lax", "strict", "none"]).default("lax"),
   CORS_ORIGINS: z.string().default("http://localhost:3000"),
   WEB_ORIGIN: z.string().default("http://localhost:3000"),
   ASSET_CDN_URL: z.string().default(""),

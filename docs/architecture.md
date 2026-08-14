@@ -115,7 +115,9 @@ apps/api
   (or bcrypt `ADMIN_PASSWORD_HASH`). JWT `{ sub: "admin", role: "admin" }`,
   cookie `spm_admin_token`.
 - Guards: `JwtAuthGuard` (players), `AdminAuthGuard` (admin role). Cookies are
-  HTTP-only; `COOKIE_SECURE` forces HTTPS in production.
+  HTTP-only; `COOKIE_SECURE` forces HTTPS in production. `COOKIE_SAMESITE`
+  defaults to `lax`; set `none` (with `COOKIE_SECURE=true`) when the web app
+  and API are hosted on different sites so browsers send the cookie cross-site.
 
 ## Round lifecycle
 

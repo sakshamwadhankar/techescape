@@ -107,18 +107,26 @@ export class AuthService {
   }
 
   setAuthCookie(res: Response, session: AuthSession): void {
-    const secure = this.config.get<string>("COOKIE_SECURE") === "true";
+    const { secure, sameSite } = this.cookiePolicy();
     res.cookie(session.cookieName, session.token, {
       httpOnly: true,
       secure,
-      sameSite: "lax",
+      sameSite,
       path: "/",
       maxAge: session.ttlSeconds * 1000,
     });
   }
 
   clearAuthCookie(res: Response, cookieName: string): void {
-    res.clearCookie(cookieName, { httpOnly: true, path: "/" });
+    const { secure, sameSite } = this.cookiePolicy();
+    res.clearCookie(cookieName, { httpOnly: true, secure, sameSite, path: "/" });
+  }
+
+  private cookiePolicy(): { secure: boolean; sameSite: "lax" | "strict" | "none" } {
+    return {
+      secure: this.config.get<string>("COOKIE_SECURE") === "true",
+      sameSite: this.config.get<"lax" | "strict" | "none">("COOKIE_SAMESITE", "lax"),
+    };
   }
 
   getSecret(): string {
