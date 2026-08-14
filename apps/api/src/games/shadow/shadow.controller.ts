@@ -57,7 +57,7 @@ export class ShadowController {
   @Post("answer")
   @ApiOperation({
     summary: "Answer a question",
-    description: "Submits an answer for a question; the correct answer is revealed only after the question resolves.",
+    description: "Submits an answer for a question; the correct answer is returned only when the answer is correct.",
   })
   @ApiBody({ type: ShadowAnswerBodyDto })
   @ApiOkResponse({ type: ShadowAnswerResponseDto })

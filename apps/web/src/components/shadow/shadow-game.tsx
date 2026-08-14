@@ -184,7 +184,7 @@ export function ShadowGame() {
               const isWrong = state.wrongAnswers.includes(option);
               const resolved =
                 last?.correct === true || state.attemptsUsed >= start.maxAttemptsPerQuestion;
-              const isCorrectAnswer = resolved && last ? option === last.correctAnswer : false;
+              const isCorrectAnswer = last?.correct === true && option === last.correctAnswer;
               const locked = busy || resolved;
               let cls = "border-line bg-panel text-ink hover:bg-raised";
               if (isWrong) cls = "border-accent-deep bg-accent-deep/30 text-accent-bright line-through";
@@ -211,7 +211,7 @@ export function ShadowGame() {
                 </p>
               ) : (
                 <p className="text-amber-400">
-                  Nope — it was <span className="font-semibold">{last.correctAnswer}</span>.
+                  Nope.
                   {start.maxAttemptsPerQuestion - state.attemptsUsed > 0
                     ? ` ${start.maxAttemptsPerQuestion - state.attemptsUsed} attempt${
                         start.maxAttemptsPerQuestion - state.attemptsUsed === 1 ? "" : "s"

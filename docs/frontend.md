@@ -213,8 +213,8 @@ Base: `/api/games/shadow` — all routes require the player cookie.
 Body: `{}`.
 
 Starts or re-opens the team's Shadow session and returns the round's questions
-in order. `options` includes the correct answer; the correct answer is only
-revealed by the server **after** a question resolves.
+in order. `options` includes the correct answer; the server returns the correct
+answer only when a submission is correct.
 
 ```json
 {
@@ -238,8 +238,9 @@ Body:
 { "questionId": "cmspxk2y30006z963kwd5pf5a", "answer": "Black Cat", "clientActionId": "ans-<uuid>" }
 ```
 
-Answers are matched case-insensitively and trimmed. The response reveals the
-correct answer **after** the question resolves and reports scoring/attempts:
+Answers are matched case-insensitively and trimmed. The response reports
+scoring/attempts; `correctAnswer` is returned only when the submitted answer is
+correct (`""` on wrong answers, never revealed):
 
 ```json
 {

@@ -170,7 +170,8 @@ Body:
 idempotency key (8–64 chars, alphanumeric + `-`); replaying one returns the
 cached response.
 
-The correct answer is revealed only after the question resolves.
+The correct answer is returned only when the submitted answer is correct; a
+wrong answer returns `correctAnswer: ""` (never revealed).
 
 ```json
 {

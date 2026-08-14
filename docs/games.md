@@ -90,7 +90,8 @@ Directory: `apps/api/src/games/shadow/`
 - 6 rounds of "Guess the Character by Shadow", 3 attempts per question.
 - Each question exposes an `assetUrl` (served from object storage/CDN, never
   through NestJS) and an answer `options` list. The correct answer lives only in
-  server-side Redis state and is revealed only after the question resolves.
+  server-side Redis state and is returned in the response **only when the team
+  answers correctly** — wrong answers never reveal it.
 - Answers are matched case-insensitively (`matchesAnswer`, trimmed + lowercased).
 - A question resolves on a correct answer **or** when 3 wrong attempts are used;
   a failed question scores `0` and the game continues to the next question.

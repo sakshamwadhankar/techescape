@@ -403,7 +403,7 @@
     },
     "/games/shadow/answer": {
       "post": {
-        "description": "Submits an answer for a question; the correct answer is revealed only after the question resolves.",
+        "description": "Submits an answer for a question; the correct answer is returned only when the answer is correct.",
         "operationId": "answer",
         "parameters": [],
         "requestBody": {
@@ -1580,7 +1580,8 @@
           },
           "correctAnswer": {
             "type": "string",
-            "description": "Revealed only after the question resolves."
+            "description": "The correct answer. Returned only when `correct` is true — empty string otherwise.",
+            "example": "Black Cat"
           },
           "attemptsUsed": {
             "type": "number",

@@ -63,7 +63,11 @@ export class ShadowAnswerResponseDto implements ShadowAnswerResponse {
   @ApiProperty()
   correct: boolean;
 
-  @ApiProperty({ description: "Revealed only after the question resolves." })
+  @ApiProperty({
+    description:
+      "The correct answer. Returned only when `correct` is true — empty string otherwise.",
+    example: "Black Cat",
+  })
   correctAnswer: string;
 
   @ApiProperty({ example: 1 })

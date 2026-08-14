@@ -102,6 +102,7 @@ export interface ShadowAnswerResponse {
   questionId: string;
   questionIndex: number;
   correct: boolean;
+  // Only populated when `correct` is true; empty string on wrong answers.
   correctAnswer: string;
   attemptsUsed: number;
   attemptsLeft: number;

@@ -54,8 +54,9 @@ The product has two audiences:
   with an answer option list.
 - Pick the character: correct on attempt 1/2/3 scores 100/70/40; three wrong
   answers lock the question (0 points) and move on.
-- The correct answer is revealed only **after** a question resolves — designers
-  must not imply the answer is knowable up front.
+- The correct answer is returned only when the team answers correctly — wrong
+  answers never reveal it, and designers must not imply the answer is knowable
+  up front or shown on a miss.
 - Max score 600.
 
 ### Match the Cards
