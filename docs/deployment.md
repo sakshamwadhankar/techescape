@@ -6,7 +6,7 @@ ends with a short section on scaling out if a single host proves insufficient.
 
 ## Prerequisites
 
-- Node.js 20+ and pnpm 9+
+- Node.js 22.13+ and pnpm 11 (see `package.json > engines` and `packageManager`)
 - Docker (for PostgreSQL + Redis) or an existing Postgres/Redis instance
 - The repo checked out with `pnpm install` completed
 

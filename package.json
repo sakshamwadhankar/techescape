@@ -5,7 +5,7 @@
   "description": "Spider-Man themed IEEE event platform (Tech Escape 3.0 Round 1)",
   "packageManager": "pnpm@11.7.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "scripts": {
     "dev": "turbo run dev",
