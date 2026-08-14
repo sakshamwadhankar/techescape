@@ -82,6 +82,37 @@ Notes:
   and one `start` request per game. (There is no `/health` endpoint yet; the
   login + start calls cover API reachability.)
 
+### Docker images
+
+Both apps ship a Dockerfile (build context = repo root):
+
+```sh
+docker build -f apps/api/Dockerfile -t spiderman-api .
+docker build -f apps/web/Dockerfile -t spiderman-web \
+  --build-arg NEXT_PUBLIC_API_URL=https://spidey.example.com/api .
+```
+
+- Multi-stage builds: `turbo prune` keeps only the target app and its
+  workspace dependencies, then `pnpm install --frozen-lockfile` + `pnpm turbo
+  build` run against the pruned graph. `tsconfig.base.json` is copied in
+  explicitly (turbo prune does not include it).
+- `NEXT_PUBLIC_API_URL` is a build ARG on the web image because it is inlined
+  into the client bundle.
+- Runtime config comes from environment variables (`DATABASE_URL`, `REDIS_URL`,
+  `JWT_SECRET`, `EVENT_PIN`, ...). The API validates required vars on boot
+  (`apps/api/src/config/env.ts`) and fails fast if any are missing; never bake
+  secrets into an image.
+- The API listens on `API_PORT` (default 4000), the web app on `PORT` (default
+  3000). Example run:
+
+```sh
+docker run -d --name api -p 4000:4000 \
+  -e DATABASE_URL=... -e REDIS_URL=... -e JWT_SECRET=... -e EVENT_PIN=... \
+  -e TRUST_PROXY=true \
+  spiderman-api
+docker run -d --name web -p 3000:3000 spiderman-web
+```
+
 ## 4. Reverse proxy (TLS)
 
 Terminate TLS in front of both apps, forward `/api/*` to the API and everything
