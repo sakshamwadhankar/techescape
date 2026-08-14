@@ -6,9 +6,9 @@ allowBuilds:
   '@scarf/scarf': false
   sharp: true
 
-onlyBuiltDependencies:
-  - "@prisma/client"
-  - "@prisma/engines"
-  - "prisma"
-  - "esbuild"
-  - "sharp"
+# onlyBuiltDependencies:
+#   - "@prisma/client"
+#   - "@prisma/engines"
+#   - "prisma"
+#   - "esbuild"
+#   - "sharp"
