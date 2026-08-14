@@ -21,6 +21,7 @@ async function bootstrap(): Promise<void> {
     .get<string>("CORS_ORIGINS", "http://localhost:3000")
     .split(",")
     .map((o) => o.trim())
+    .map((o) => o.replace(/\/+$/, ""))
     .filter(Boolean);
 
   app.enableCors({ origin: origins, credentials: true, maxAge: 3600 });
