@@ -79,7 +79,7 @@ export function buildDeck(
     id: v4FromRng(rng),
     index,
     pairId: slot.pairId,
-    frontAssetUrl: `${assetBaseUrl}/assets/cards/${slot.pairId}.svg`,
+    frontAssetUrl: `${assetBaseUrl}/assets/cards/${slot.pairId}.jpeg`,
   }));
   return {
     cards,

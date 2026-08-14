@@ -61,8 +61,7 @@ The product has two audiences:
 
 ### Match the Cards
 
-- Memory match: **12 pairs on a 24-card board** (3 motifs × 4 colorways,
-  all spider-hero themed).
+- Memory match: **12 pairs on a 24-card board** (spider-hero themed).
 - Flip two cards per attempt; matching pairs stay face-up, mismatches flip
   back. The server decides and tells the UI what happened.
 - Score = `100 × pairs matched − 10 × extra moves`, floor 0. A perfect 24-move

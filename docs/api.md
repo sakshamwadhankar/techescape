@@ -265,7 +265,7 @@ A move flips one card. The front asset is revealed only on a flip.
 {
   "moveId": "m1",
   "cardId": "a00c6eca-b097-430c-b799-b1fdcf6a22e1",
-  "frontAssetUrl": "https://cdn.example.com/assets/cards/black-cat.svg",
+  "frontAssetUrl": "https://cdn.example.com/assets/cards/c1.jpeg",
   "revealed": true,
   "matched": false,
   "matchCompleted": false,

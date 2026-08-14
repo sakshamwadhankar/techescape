@@ -308,7 +308,7 @@ A move flips one card; the front asset is returned only for that card on flip:
 {
   "moveId": "m-<uuid>",
   "cardId": "a00c6eca-b097-430c-b799-b1fdcf6a22e1",
-  "frontAssetUrl": "https://cdn.example.com/assets/cards/black-cat.svg",
+  "frontAssetUrl": "https://cdn.example.com/assets/cards/c1.jpeg",
   "revealed": true,
   "matched": false,
   "matchCompleted": false,

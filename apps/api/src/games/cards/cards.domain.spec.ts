@@ -81,7 +81,7 @@ describe("cards.domain", () => {
       const deck = buildDeck(1, SLUGS, BASE);
       expect(deck.backAssetUrl).toBe(`${BASE}/assets/cards/back.svg`);
       for (const card of deck.cards) {
-        expect(card.frontAssetUrl).toBe(`${BASE}/assets/cards/${card.pairId}.svg`);
+        expect(card.frontAssetUrl).toBe(`${BASE}/assets/cards/${card.pairId}.jpeg`);
       }
     });
   });

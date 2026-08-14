@@ -136,7 +136,8 @@ Directory: `apps/api/src/games/cards/`
 ### Rules
 
 - Memory match: 12 pairs on a 24-card board. Each pair is one distinct front
-  asset (3 motifs × 4 colors); the deck is generated from `CARDS_DECK_SLUGS`.
+  asset; the deck is generated from `CARDS_DECK_SLUGS` (`c1`..`c12`, served as
+  `.jpeg` files).
 - A move is a single flip (`POST /move` with a `cardId`). Two face-up cards
   resolve an attempt: matching `pairId`s keep the pair face-up (`matched`),
   otherwise both flip back (`unmatchedFlipBack`).
