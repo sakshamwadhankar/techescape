@@ -107,7 +107,9 @@ docker build -f apps/web/Dockerfile -t spiderman-web \
   (`apps/api/src/config/env.ts`) and fails fast if any are missing; never bake
   secrets into an image.
 - The API listens on `API_PORT` (default 4000), the web app on `PORT` (default
-  3000). Example run:
+  3000). On Railway (and similar PaaS) the platform injects a `PORT` variable;
+  if `API_PORT` is not set the API falls back to `PORT` so it binds to the port
+  Railway routes traffic to (`apps/api/src/config/env.ts`). Example run:
 
 ```sh
 docker run -d --name api -p 4000:4000 \
@@ -117,7 +119,43 @@ docker run -d --name api -p 4000:4000 \
 docker run -d --name web -p 3000:3000 spiderman-web
 ```
 
-## 4. Reverse proxy (TLS)
+## 4. Deploying on Railway
+
+The API runs on Railway as a containerized web service (Nixpacks or the
+`apps/api/Dockerfile`). Railway injects env vars straight into `process.env`.
+The API itself loads the repo-root `.env` file in code before boot
+(`apps/api/src/main.ts`, via `dotenv`) — if the file is absent it's a silent
+no-op, and `process.env` always wins over the file, so Railway's injected
+variables take precedence. No `.env` file is needed in the image.
+
+Set these variables on the Railway service (Dashboard → Service → Variables):
+
+| Variable | Source |
+| --- | --- |
+| `DATABASE_URL` | Railway Postgres plugin (internal `DATABASE_URL`) |
+| `REDIS_URL` | Railway Key Value plugin (`REDIS_URL`) |
+| `JWT_SECRET` | `openssl rand -hex 64` — rotate per event |
+| `EVENT_PIN` | The event access PIN (≥ 4 chars) |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of the admin password; leave `ADMIN_PASSWORD` empty |
+| `COOKIE_SECURE` | `true` (HTTPS) |
+| `WEB_ORIGIN` / `CORS_ORIGINS` | Public web origin, e.g. `https://web-production-xxxx.up.railway.app` |
+| `TRUST_PROXY` | `true` (Railway proxies traffic; rate limiting reads `X-Forwarded-For`) |
+| `RATE_LIMIT_MAX` | `400` at the event |
+
+Port: Railway injects `PORT` and routes traffic to it. The API falls back to
+`PORT` when `API_PORT` is unset, so leave `API_PORT` empty.
+
+Build/start commands (if not using the Dockerfile):
+
+```sh
+# Build: pnpm build   → Start: pnpm start
+```
+Migrations run automatically on container start via the image entrypoint
+(`prisma migrate deploy`). The service fails fast on boot if a required
+variable is missing — the log line `Invalid environment configuration: ...`
+names the exact variable(s) to set.
+
+## 5. Reverse proxy (TLS)
 
 Terminate TLS in front of both apps, forward `/api/*` to the API and everything
 else to the web app. Example Caddyfile:

@@ -49,7 +49,11 @@ const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 export function validateEnv(config: Record<string, unknown>): Env {
-  const parsed = envSchema.safeParse(config);
+  const merged = { ...config };
+  if (merged.API_PORT == null && merged.PORT != null) {
+    merged.API_PORT = merged.PORT;
+  }
+  const parsed = envSchema.safeParse(merged);
   if (!parsed.success) {
     const details = parsed.error.errors
       .map((e) => `${e.path.join(".")}: ${e.message}`)

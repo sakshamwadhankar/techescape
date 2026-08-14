@@ -5,7 +5,7 @@
   "scripts": {
     "build": "nest build",
     "dev": "dotenv -e ../../.env -- nest start --watch",
-    "start": "dotenv -e ../../.env -- node dist/main.js",
+    "start": "node dist/main.js",
     "openapi:gen": "nest build && dotenv -e ../../.env -- node dist/openapi-gen.js",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
@@ -27,6 +27,7 @@
     "an-array-of-english-words": "^2.0.0",
     "bcryptjs": "^3.0.0",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.1",
     "ioredis": "^5.4.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

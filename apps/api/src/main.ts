@@ -1,3 +1,5 @@
+import { config as loadEnv } from "dotenv";
+import { join } from "path";
 import { NestFactory } from "@nestjs/core";
 import cookieParser from "cookie-parser";
 import { ConfigService } from "@nestjs/config";
@@ -9,6 +11,8 @@ import {
   SWAGGER_DOC_PATH,
   swaggerDocumentOptions,
 } from "./swagger.config";
+
+loadEnv({ path: join(__dirname, "../../../.env"), quiet: true });
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
