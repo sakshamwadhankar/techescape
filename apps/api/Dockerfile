@@ -25,5 +25,8 @@ COPY --from=builder /repo/node_modules ./node_modules
 COPY --from=builder /repo/packages ./packages
 COPY --from=builder /repo/apps/api ./apps/api
 COPY --from=builder /repo/package.json ./package.json
+COPY apps/api/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 EXPOSE 4000
+ENTRYPOINT ["/repo/entrypoint.sh"]
 CMD ["node", "apps/api/dist/main.js"]

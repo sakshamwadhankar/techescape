@@ -98,6 +98,10 @@ docker build -f apps/web/Dockerfile -t spiderman-web \
   explicitly (turbo prune does not include it).
 - `NEXT_PUBLIC_API_URL` is a build ARG on the web image because it is inlined
   into the client bundle.
+- The API image entrypoint runs `prisma migrate deploy` against
+  `DATABASE_URL` before starting the app, so migrations are applied
+  automatically on container start (safe to re-run; it applies only pending
+  migrations). The web image has no database.
 - Runtime config comes from environment variables (`DATABASE_URL`, `REDIS_URL`,
   `JWT_SECRET`, `EVENT_PIN`, ...). The API validates required vars on boot
   (`apps/api/src/config/env.ts`) and fails fast if any are missing; never bake
