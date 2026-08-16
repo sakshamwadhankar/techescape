@@ -96,9 +96,6 @@ importers:
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
-      dotenv-cli:
-        specifier: ^7.4.2
-        version: 7.4.4
       eslint:
         specifier: ^9.9.0
         version: 9.39.5(jiti@2.7.0)
@@ -120,12 +117,30 @@ importers:
 
   apps/web:
     dependencies:
+      '@spiderman/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@spiderman/types':
         specifier: workspace:*
         version: link:../../packages/types
       '@spiderman/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@spiderman/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
+      an-array-of-english-words:
+        specifier: ^2.0.0
+        version: 2.0.0
+      bcryptjs:
+        specifier: ^3.0.0
+        version: 3.0.3
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.11.1
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.3
       next:
         specifier: ^15.1.0
         version: 15.5.23(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -138,13 +153,25 @@ importers:
       react-icons:
         specifier: ^5.7.0
         version: 5.7.0(react@19.2.8)
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
     devDependencies:
+      '@prisma/nextjs-monorepo-workaround-plugin':
+        specifier: ^6.19.3
+        version: 6.19.3
       '@spiderman/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@tailwindcss/postcss':
         specifier: ^4.0.0
         version: 4.3.3
+      '@types/bcryptjs':
+        specifier: ^2.4.6
+        version: 2.4.6
+      '@types/jsonwebtoken':
+        specifier: ^9.0.8
+        version: 9.0.10
       '@types/node':
         specifier: ^22.0.0
         version: 22.20.1
@@ -1334,6 +1361,9 @@ packages:
 
   '@prisma/get-platform@6.19.3':
     resolution: {integrity: sha512-xFj1VcJ1N3MKooOQAGO0W5tsd0W2QzIvW7DD7c/8H14Zmp4jseeWAITm+w2LLoLrlhoHdPPh0NMZ8mfL6puoHA==}
+
+  '@prisma/nextjs-monorepo-workaround-plugin@6.19.3':
+    resolution: {integrity: sha512-lu3KrWToTwYrkEk1UHoMW4aqa69USu3yaG9+gnHmjeAQuCb804NHq0PvkS7Zd7D/ViDDrIKKQE5pzdwLn1EgoA==}
 
   '@rollup/rollup-android-arm-eabi@4.62.4':
     resolution: {integrity: sha512-RrPokAb7dmbxFoeO3TloqHyOjgye8RkBhSqmp4aJMIex4c9r46ZstPnleDQOq1t46VOVjwIuwNogIqbodV1Vvg==}
@@ -5348,6 +5378,8 @@ snapshots:
   '@prisma/get-platform@6.19.3':
     dependencies:
       '@prisma/debug': 6.19.3
+
+  '@prisma/nextjs-monorepo-workaround-plugin@6.19.3': {}
 
   '@rollup/rollup-android-arm-eabi@4.62.4':
     optional: true

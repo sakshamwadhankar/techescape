@@ -7,19 +7,18 @@ This is a **Turborepo monorepo**; the backend is a **modular monolith**.
 
 | Layer | Tech |
 |---|---|
-| Frontend | Next.js + React + TypeScript + Tailwind (`apps/web`) |
-| Backend | NestJS + TypeScript (`apps/api`) |
+| Platform (UI + API) | Next.js 15 App Router + React + TypeScript (`apps/web`) |
 | Database | PostgreSQL + Prisma (`packages/db`) |
-| Cache / temp state | Redis (`apps/api/src/common/redis`) |
-| Assets | S3/R2 object storage + CDN (never served through NestJS) |
-| Deployment | Docker + Cloudflare/CDN |
+| Cache / temp state | Redis (`apps/web/src/server/redis.ts`) |
+| Assets | S3/R2 object storage + CDN |
+| Deployment | Railway / Docker |
 
 ## Repo layout
 
 ```text
 apps/
-  web/                 # Next.js student + admin UI (client components, direct-fetch)
-  api/                 # NestJS API
+  web/                 # Next.js web application + API Route Handlers (src/app/api/...)
+  api/                 # Legacy NestJS API (optional / reference)
 packages/
   db/                  # Prisma schema + client
   types/               # Shared TypeScript types (no logic)
@@ -96,10 +95,11 @@ apps/api
   persisted as a `GameAction`; the session row (`GameSession`) is authoritative
   for status, score, and result.
 - **Redis holds only temporary state**: per-session game state
-  (`state:<sessionId>`), idempotency responses (`idem:<sessionId>:<key>`),
-  per-session locks (`lock:<sessionId>`), the cached round (`round:current`),
-  per-round game data (wordle answer, shadow questions, cards deck/seed), and
-  the leaderboard cache (`leaderboard:round:<id>`).
+  (`state:<sessionId>`), per-team session lookups (`session:team:<teamId>:<game>`),
+  idempotency responses (`idem:<sessionId>:<key>`), per-session locks
+  (`lock:<sessionId>`), the cached round (`round:current`), per-round game data
+  (wordle answer, shadow questions, cards deck/seed), and the leaderboard cache
+  (`leaderboard:round:<id>`).
 - **The API is stateless** — no authoritative game state lives in process
   memory, so any instance can serve any request.
 - **The server is authoritative** — the browser only renders; all answers,

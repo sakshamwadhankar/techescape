@@ -6,44 +6,45 @@ export interface ShadowQuestionSeed {
 }
 
 /**
- * Dev placeholder asset URLs (relative — served by apps/web in development).
- * Replace `assetUrl` with real CDN/object-storage URLs before the event.
+ * Event shadow questions. `character` is the correct answer; `distractors` are
+ * wrong options. `assetUrl` is relative to the web app origin (served from
+ * `apps/web/public/assets/shadow/` in dev and on Vercel).
  */
 export const shadowQuestions: ShadowQuestionSeed[] = [
   {
-    slug: "spiderman",
-    character: "Spider-Man",
-    assetUrl: "/assets/shadow/spiderman.svg",
-    distractors: ["Scarlet Spider", "Ben Reilly", "Kaine Parker"],
-  },
-  {
-    slug: "venom",
-    character: "Venom",
-    assetUrl: "/assets/shadow/venom.svg",
-    distractors: ["Carnage", "Anti-Venom", "Riot"],
-  },
-  {
-    slug: "green-goblin",
-    character: "Green Goblin",
-    assetUrl: "/assets/shadow/green-goblin.svg",
-    distractors: ["Hobgoblin", "Jack O'Lantern", "Goblin King"],
+    slug: "deadpool",
+    character: "Deadpool",
+    assetUrl: "/assets/shadow/deadpool.png",
+    distractors: ["Taskmaster", "Carnage", "Morbius"],
   },
   {
     slug: "doctor-octopus",
     character: "Doctor Octopus",
-    assetUrl: "/assets/shadow/doctor-octopus.svg",
+    assetUrl: "/assets/shadow/dococ.png",
     distractors: ["Mysterio", "Scorpion", "Electro"],
   },
   {
-    slug: "miles-morales",
-    character: "Miles Morales",
-    assetUrl: "/assets/shadow/miles-morales.svg",
-    distractors: ["Spider-Gwen", "Silk", "Spider-Man 2099"],
+    slug: "spider-gwen",
+    character: "Spider-Gwen",
+    assetUrl: "/assets/shadow/gwen.png",
+    distractors: ["Silk", "Spider-Woman", "Spider-Man 2099"],
   },
   {
-    slug: "black-cat",
-    character: "Black Cat",
-    assetUrl: "/assets/shadow/black-cat.svg",
-    distractors: ["Silver Sable", "Prowler", "Shocker"],
+    slug: "spider-man-noir",
+    character: "Spider-Man Noir",
+    assetUrl: "/assets/shadow/noir.png",
+    distractors: ["Prowler", "Scarlet Spider", "Kaine Parker"],
+  },
+  {
+    slug: "catwomen",
+    character: "Catwoman",
+    assetUrl: "/assets/shadow/catwomen.png",
+    distractors: ["Black Cat", "Black Panther", "Tigress"],
+  },
+  {
+    slug: "lizard",
+    character: "Lizard",
+    assetUrl: "/assets/shadow/lizard.png",
+    distractors: ["Rhino", "Kraven the Hunter", "Iguana"],
   },
 ];

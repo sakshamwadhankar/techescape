@@ -44,7 +44,10 @@ Read this before starting work — it records what is done and what remains.
 
 ### Phase B — Security hardening (DONE)
 
-* `.env` is gitignored; dev secrets were rotated; admin supports bcrypt
+* `.env` is gitignored and only used as the source that `encrypt-secrets.mjs`
+  encrypts into `apps/api/secrets.json`; the runtime never reads `.env` (config
+  comes from `process.env` + the encrypted file). Dev secrets were rotated;
+  admin supports bcrypt
   `ADMIN_PASSWORD_HASH` for production (leave `ADMIN_PASSWORD` empty then).
 * Rate limiting via `ThrottlerGuard`, env-configurable: `RATE_LIMIT_MAX`
   (default 400 req/min/IP), `RATE_LIMIT_TTL` (default 60s), `TRUST_PROXY`.

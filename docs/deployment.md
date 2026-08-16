@@ -1,5 +1,10 @@
 # Deployment
 
+> **Current production path: Vercel.** `apps/web` hosts both the UI **and** the
+> API route handlers (the legacy NestJS `apps/api` is no longer deployed).
+> Deploy = push to the `techescape-web` Vercel project
+> (`https://techescape-web-psi.vercel.app`). See §"Vercel deployment" below.
+
 This document covers running the platform for the event. It targets a **single
 host** (the simplest topology that meets the 500+ concurrent player goal) and
 ends with a short section on scaling out if a single host proves insufficient.
@@ -26,6 +31,81 @@ PostgreSQL and Redis run on the same host via `docker compose`. Static assets
 (shadow images, card art) are served from object storage behind a CDN; in
 development they fall back to the web app origin.
 
+## Vercel deployment (web app + API routes)
+
+`apps/web` is a Next.js App Router app whose `src/app/api/**` route handlers
+implement the platform API (auth, games, leaderboard, admin). It is deployed to
+Vercel; the sections below document the single-host alternative.
+
+Project setup (already applied to the `techescape-web` project):
+
+- **Root Directory**: `apps/web` — deploy from the repo root so the full
+  monorepo is uploaded. Deploying from `apps/web` alone breaks workspace
+  resolution (`ERR_PNPM_NO_MATCHING_VERSION_INSIDE_WORKSPACE`).
+- **Build**: `apps/web/vercel.json` → `framework: nextjs`,
+  `installCommand: pnpm install`,
+  `buildCommand: turbo run build --filter=@spiderman/web`. The turbo pipeline
+  compiles `packages/db` (whose `dist/` is gitignored), so a bare `next build`
+  will not work on Vercel.
+- **Env vars** are set in all three scopes (production/preview/development):
+  `DATABASE_URL` (Supabase **transaction pooler** port 6543, `?pgbouncer=true`),
+  `DIRECT_URL` (**session pooler** port 5432 — used by migrations only),
+  `REDIS_URL` (Upstash), `JWT_SECRET`, `EVENT_PIN`, `ADMIN_USERNAME`,
+  `ADMIN_PASSWORD`, `COOKIE_SECURE=true`,
+  `WEB_ORIGIN`/`CORS_ORIGINS` = `https://techescape-web-psi.vercel.app`.
+- **Migrations** run locally, never on Vercel:
+  `pnpm --filter @spiderman/db migrate` (reads the repo-root `.env`).
+  `DIRECT_URL` must be the session-mode pooler — the direct host
+  `db.<ref>.supabase.co` rejects these credentials (P1000).
+- CLI: from repo root, `vercel deploy --prod --yes`. Vercel's turbo cache may
+  mark tasks cached; changing `next.config.ts`/`package.json`/schema invalidates
+  the affected tasks.
+
+### Prisma query engine on Vercel (must-stay-in-sync config)
+
+The Prisma query engine is a native `.so.node` file that Vercel's serverless
+bundling does **not** include by default in a pnpm monorepo. Symptom: build
+succeeds, runtime 500 —
+`Prisma Client could not locate the Query Engine for runtime "rhel-openssl-3.0.x"`
+and the engine file is absent from the function bundle.
+
+Why: `prisma generate` writes the engine into a **generated sibling directory**
+(`node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/`), not into
+the published `@prisma/client` package. Next.js file tracing follows
+`require("@prisma/client")` but never statically references the `.prisma/client`
+dir, so the engine is left out of the lambda.
+
+The working configuration:
+
+1. `packages/db/prisma/schema.prisma`:
+   ```prisma
+   generator client {
+     provider      = "prisma-client-js"
+     binaryTargets = ["native", "rhel-openssl-3.0.x"]
+   }
+   ```
+2. `apps/web/next.config.ts` — `@prisma/nextjs-monorepo-workaround-plugin`
+   (devDependency of `apps/web`, version must match `@prisma/client`), pushed as
+   a server-side webpack plugin. Keep `output: "standalone"` and
+   `serverExternalPackages: ["@prisma/client", "@prisma/engines"]`.
+3. `apps/web/prisma-plugin.d.ts` — ambient declaration; the plugin ships no
+   TypeScript types.
+
+**Verify gate before any deploy**: after `pnpm --filter @spiderman/db generate
+&& pnpm --filter @spiderman/web build`, the engine **must** exist in the server
+output:
+
+```sh
+find apps/web/.next -name 'libquery_engine-rhel-openssl-3.0.x.so.node'
+# must list apps/web/.next/server/chunks/libquery_engine-rhel-openssl-3.0.x.so.node
+```
+
+If it is missing there, the lambda will fail at runtime no matter what the build
+log says. If this ever regresses, the bulletproof fallback is the driver adapter
+(`@prisma/adapter-pg` + `previewFeatures = ["driverAdapters"]`), which replaces
+the binary engine with a Wasm query compiler that ships inside `@prisma/client`
+— eliminating the class of error entirely.
+
 ## 1. Provision the databases
 
 ```sh
@@ -39,8 +119,27 @@ state/cache/locks) persist anything.
 
 ## 2. Configure the environment
 
-Copy `.env.example` to `.env` on the host and set production values. Required
-changes from the template:
+The API reads runtime config from two places, resolved in order (first one that
+provides a value wins):
+
+1. `process.env` — anything the host sets (e.g. Railway service variables, or
+   `VAR=... node apps/api/dist/main.js`).
+2. `apps/api/secrets.json` — AES-256-GCM-encrypted values decrypted at boot by
+   `loadSecrets()` (`apps/api/src/config/load-secrets.ts`), used only for vars
+   that are still unset. This is the fallback that lets a bare Docker image boot
+   with zero env vars; it is **obfuscation, not real secret storage** (the key
+   is hardcoded in the source and ships in the image).
+
+Generate `secrets.json` from the repo-root `.env`:
+
+```sh
+node scripts/encrypt-secrets.mjs        # writes apps/api/secrets.json
+node scripts/encrypt-secrets.mjs --print  # decrypt + print values (sanity check)
+```
+
+`.env` is never read at runtime — it is only the local plaintext source the
+generator reads, plus the source for Prisma dev tooling. `.env.example` lists
+every available variable. Required values for production:
 
 | Variable | Production value |
 | --- | --- |
@@ -56,7 +155,12 @@ changes from the template:
 | `ASSET_CDN_URL` | Public CDN base for shadow/card assets |
 | `NEXT_PUBLIC_API_URL` (web) | Public API base, e.g. `https://spidey.example.com/api` |
 
-Do **not** reuse dev secrets. Never commit `.env`.
+The `encrypt-secrets` script overrides the env-dependent flags for the image
+(`COOKIE_SECURE=true`, `TRUST_PROXY=true`, `WEB_ORIGIN=https://techescape-web.vercel.app`)
+and skips platform-owned vars (`NODE_ENV`, `API_PORT`, `PORT`, `S3_*`), so the
+single file is safe for both local dev and the deployed image.
+
+Do **not** reuse dev secrets. Never commit plaintext `.env`.
 
 ## 3. Build and start
 
@@ -126,9 +230,7 @@ The API runs on Railway as a containerized web service (Nixpacks or the
 Boot-time config resolution order (first one that provides a value wins):
 
 1. `process.env` — Railway service variables, or whatever the host sets.
-2. Repo-root `.env` via `dotenv` (`apps/api/src/main.ts`) — silent no-op if
-   absent; not present in the image.
-3. `apps/api/secrets.json` — AES-256-GCM-encrypted values, decrypted by
+2. `apps/api/secrets.json` — AES-256-GCM-encrypted values, decrypted by
    `loadSecrets()` (`apps/api/src/config/load-secrets.ts`) and used only for
    vars that are still unset. This is the **fallback that lets the image boot
    with zero Railway service variables**.
@@ -198,7 +300,8 @@ Set `TRUST_PROXY=true` so per-client rate limiting reads `X-Forwarded-For`.
 ## 5. Event-day runbook
 
 1. Confirm `docker compose ps` (postgres + redis healthy).
-2. Confirm `.env` has the event PIN (`EVENT_PIN`), correct `ADMIN_PASSWORD_HASH`,
+2. Confirm `secrets.json` is current (re-run `node scripts/encrypt-secrets.mjs`)
+   with the event PIN (`EVENT_PIN`), correct `ADMIN_PASSWORD_HASH`,
    and `RATE_LIMIT_MAX=400`.
 3. Confirm the round is `ACTIVE` from the admin dashboard (or
    `POST /api/admin/round/start`).

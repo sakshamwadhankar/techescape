@@ -73,10 +73,11 @@ export class SessionsService {
     }
 
     let sessionId: string;
+    let sessionRecord: GameSession;
     if (existing) {
       // ABANDONED → reset for a fresh attempt.
       await this.prisma.gameAction.deleteMany({ where: { sessionId: existing.id } });
-      await this.prisma.gameSession.update({
+      sessionRecord = await this.prisma.gameSession.update({
         where: { id: existing.id },
         data: {
           status: "ACTIVE",
@@ -92,10 +93,10 @@ export class SessionsService {
       sessionId = existing.id;
     } else {
       try {
-        const created = await this.prisma.gameSession.create({
+        sessionRecord = await this.prisma.gameSession.create({
           data: { teamId, game, startedAt, expiresAt },
         });
-        sessionId = created.id;
+        sessionId = sessionRecord.id;
       } catch (error) {
         if (
           error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -112,6 +113,11 @@ export class SessionsService {
     await this.redis.setJson(
       `state:${sessionId}`,
       initialState,
+      duration + SESSION_STATE_TTL_BUFFER_SECONDS,
+    );
+    await this.redis.setJson(
+      this.sessionCacheKey(teamId, game),
+      sessionRecord,
       duration + SESSION_STATE_TTL_BUFFER_SECONDS,
     );
     return { sessionId, expiresAt, startedAt };
@@ -136,10 +142,8 @@ export class SessionsService {
 
   /** The active session for a team + game. One exists per (teamId, game). */
   async getActiveByTeam(teamId: string, game: Game): Promise<GameSession> {
-    const session = await this.prisma.gameSession.findFirst({
-      where: { teamId, game, status: "ACTIVE" },
-    });
-    if (!session) {
+    const session = await this.findByTeam(teamId, game);
+    if (session.status !== "ACTIVE") {
       throw new NotFoundException("No active session for this game — start the game first");
     }
     return session;
@@ -147,10 +151,16 @@ export class SessionsService {
 
   /** Any session (any status) for a team + game. */
   async findByTeam(teamId: string, game: Game): Promise<GameSession> {
+    const key = this.sessionCacheKey(teamId, game);
+    const cached = await this.redis.getJson<GameSession>(key);
+    if (cached) return this.normalizeSession(cached);
+
     const session = await this.prisma.gameSession.findFirst({
       where: { teamId, game },
     });
     if (!session) throw new NotFoundException("Session not found");
+
+    await this.redis.setJson(key, session, this.remainingTtl(session));
     return session;
   }
 
@@ -208,7 +218,14 @@ export class SessionsService {
       const dup = await this.prisma.gameSession.findUnique({
         where: { finishKey: input.finishKey },
       });
-      if (dup) return dup;
+      if (dup) {
+        await this.redis.setJson(
+          this.sessionCacheKey(dup.teamId, dup.game),
+          dup,
+          this.remainingTtl(dup),
+        );
+        return dup;
+      }
     }
 
     const finishedAt = new Date();
@@ -225,12 +242,24 @@ export class SessionsService {
         },
       });
       await this.redis.del(`state:${sessionId}`, `lock:${sessionId}`);
+      await this.redis.setJson(
+        this.sessionCacheKey(updated.teamId, updated.game),
+        updated,
+        this.remainingTtl(updated),
+      );
       return updated;
     } catch (error) {
       const dup = await this.prisma.gameSession.findUnique({
         where: { finishKey: input.finishKey ?? "___none___" },
       });
-      if (dup) return dup;
+      if (dup) {
+        await this.redis.setJson(
+          this.sessionCacheKey(dup.teamId, dup.game),
+          dup,
+          this.remainingTtl(dup),
+        );
+        return dup;
+      }
       throw error;
     }
   }
@@ -249,7 +278,11 @@ export class SessionsService {
         finishKey: null,
       },
     });
-    await this.redis.del(`state:${sessionId}`, `lock:${sessionId}`);
+    await this.redis.del(
+      `state:${sessionId}`,
+      `lock:${sessionId}`,
+      this.sessionCacheKey(session.teamId, session.game),
+    );
     await this.redis.delPattern(`idem:${sessionId}:*`);
     return session;
   }
@@ -261,14 +294,34 @@ export class SessionsService {
     payload: unknown,
     result: unknown,
   ): Promise<void> {
-    await this.prisma.gameAction.create({
-      data: {
-        sessionId,
-        clientActionId,
-        type,
-        payload: (payload as object) ?? {},
-        result: (result as object) ?? {},
-      },
-    });
+    try {
+      await this.prisma.gameAction.create({
+        data: {
+          sessionId,
+          clientActionId,
+          type,
+          payload: (payload as object) ?? {},
+          result: (result as object) ?? {},
+        },
+      });
+    } catch {
+      // Record action error should not break the move flow
+    }
   }
+
+  private sessionCacheKey(teamId: string, game: Game): string {
+    return `session:team:${teamId}:${game}`;
+  }
+
+  private normalizeSession(session: GameSession): GameSession {
+    return {
+      ...session,
+      startedAt: new Date(session.startedAt),
+      expiresAt: new Date(session.expiresAt),
+      finishedAt: session.finishedAt ? new Date(session.finishedAt) : null,
+      createdAt: new Date(session.createdAt),
+      updatedAt: new Date(session.updatedAt),
+    };
+  }
+
 }

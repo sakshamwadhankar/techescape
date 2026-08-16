@@ -30,8 +30,9 @@ Key guarantees, all enforced server-side:
   `TIMEOUT` with score `0`; the browser countdown is visual only.
 - Completion is idempotent: `completeSession` keys on `finishKey` (unique) and
   is a no-op when the session is already terminal.
-- Game state lives in Redis (`state:<sessionId>`); answers are **never**
-  returned to the client.
+- Game state lives in Redis (`state:<sessionId>`); session lookups (`findByTeam`)
+  are cached in Redis (`session:team:<teamId>:<game>`) to avoid DB reads on moves;
+  answers are **never** returned to the client.
 
 ## Wordle
 
@@ -79,19 +80,23 @@ progress.
 
 ## Shadow
 
-Directory: `apps/api/src/games/shadow/`
+Directory: `apps/web/src/server/services/`
 
 - `shadow.domain.ts` — pure logic (answer matching, scoring, resolution).
 - `shadow.service.ts` — session orchestration + per-round Redis question cache.
-- `shadow.controller.ts` — `POST /api/games/shadow/*`.
 
 ### Rules
 
-- 6 rounds of "Guess the Character by Shadow", 3 attempts per question.
-- Each question exposes an `assetUrl` (served from object storage/CDN, never
-  through NestJS) and an answer `options` list. The correct answer lives only in
-  server-side Redis state and is returned in the response **only when the team
-  answers correctly** — wrong answers never reveal it.
+- "Guess the Character by Shadow": one question per active
+  `ShadowQuestion` row, 3 attempts per question. The event set is currently 4
+  questions (Deadpool, Doctor Octopus, Spider-Gwen, Spider-Man Noir), defined
+  in `packages/db/prisma/seedData/shadowQuestions.ts` and applied with
+  `pnpm --filter @spiderman/db seed` (seeding is idempotent and deactivates
+  stale questions).
+- Each question exposes an `assetUrl` (relative to the web origin, served from
+  `apps/web/public/assets/shadow/`) and an answer `options` list. The correct
+  answer lives only in server-side Redis state and is returned in the response
+  **only when the team answers correctly** — wrong answers never reveal it.
 - Answers are matched case-insensitively (`matchesAnswer`, trimmed + lowercased).
 - A question resolves on a correct answer **or** when 3 wrong attempts are used;
   a failed question scores `0` and the game continues to the next question.
@@ -99,7 +104,9 @@ Directory: `apps/api/src/games/shadow/`
   the score earned so far.
 - The question set is stable for the whole round. The first `start` loads the
   active questions and caches them in Redis (`shadow:questions:round:<id>`), so
-  500+ concurrent starts read from Redis, not Postgres.
+  500+ concurrent starts read from Redis, not Postgres. Re-run the seed **and**
+  clear that Redis key (or wait for TTL) after changing questions, otherwise
+  teams keep seeing the cached set.
 
 ### Scoring
 
@@ -110,7 +117,7 @@ Per question:
   3rd attempt correct:    40
   failed / timeout:        0
 
-Session total = sum of question scores (max 600)
+Session total = sum of question scores (max 400 for the 4-question set)
 ```
 
 ### API

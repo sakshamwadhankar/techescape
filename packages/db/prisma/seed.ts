@@ -23,6 +23,7 @@ async function main(): Promise<void> {
   console.log(`Round ${round.number} ready (${round.status})`);
 
   let ensured = 0;
+  const seedSlugs = shadowQuestions.map((q) => q.slug);
   for (const q of shadowQuestions) {
     const options = shuffle([q.character, ...q.distractors]);
     await prisma.shadowQuestion.upsert({
@@ -35,11 +36,23 @@ async function main(): Promise<void> {
         correctAnswer: q.character,
         active: true,
       },
-      update: { assetUrl: q.assetUrl, active: true },
+      update: {
+        character: q.character,
+        assetUrl: q.assetUrl,
+        options,
+        correctAnswer: q.character,
+        active: true,
+      },
     });
     ensured += 1;
   }
   console.log(`Shadow questions ensured: ${ensured}`);
+
+  const stale = await prisma.shadowQuestion.updateMany({
+    where: { active: true, slug: { notIn: seedSlugs } },
+    data: { active: false },
+  });
+  console.log(`Shadow questions deactivated (stale): ${stale.count}`);
 
   console.log("Seed complete.");
 }
